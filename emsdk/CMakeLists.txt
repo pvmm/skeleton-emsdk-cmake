@@ -10,7 +10,7 @@ include(ExternalProject)
 function(setupEmsdk)
     ExternalProject_Add (emsdk
         GIT_REPOSITORY https://github.com/emscripten-core/emsdk
-        GIT_TAG 961e66c5099e1119dda25f7a8945d155fc561c90
+	GIT_TAG ce1d281ce65b5c7398b17ed6484efc6a3901df6f
         PREFIX "${PROJECT_BINARY_DIR}/emsdk"
         CONFIGURE_COMMAND ${EMSDK_DIR}/emsdk install latest
         BUILD_COMMAND ${EMSDK_DIR}/emsdk activate latest
@@ -19,7 +19,6 @@ function(setupEmsdk)
 endfunction()
 
 setupEmsdk()
-set(CMAKE_C_COMPILER ${EMSDK_DIR}/upstream/emscripten/emcc)
 
 add_custom_command(
     TARGET emsdk POST_BUILD
