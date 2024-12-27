@@ -31,7 +31,7 @@ if(PLATFORM STREQUAL "Web")
     add_compile_definitions(PLATFORM_WEB)
     add_compile_definitions(PLATFORM=Web)
     target_compile_options(dummy PUBLIC --target=wasm32 -Os -DCLAY_WASM -mbulk-memory -nostdlib)
-    target_link_options(dummy PUBLIC --target=wasm32 -Wl,--strip-all -Wl,--export-dynamic -Wl,--no-entry -Wl,--export=__heap_base -Wl,--export=ACTIVE_RENDERER_INDEX -Wl,--initial-memory=6553600 -Wl,-sERROR_ON_UNDEFINED_SYMBOLS=0)
+    target_link_options(dummy PUBLIC --target=wasm32 -Wl,--strip-all -Wl,--export-dynamic -Wl,--no-entry -Wl,--export=__heap_base -Wl,--export=ACTIVE_RENDERER_INDEX -Wl,--initial-memory=16908288)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     # Desktop-specific configurations
@@ -72,14 +72,14 @@ target_link_libraries(dummy PUBLIC raylib)
 #	COMMAND ${CMAKE_COMMAND} -E make_directory
 #	${CMAKE_CURRENT_BINARY_DIR}/web)
 
-add_custom_command(
-	TARGET dummy POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-	${CMAKE_CURRENT_SOURCE_DIR}/resources
-	${CMAKE_CURRENT_BINARY_DIR}/web)
+#add_custom_command(
+#	TARGET dummy POST_BUILD
+#	COMMAND ${CMAKE_COMMAND} -E copy_directory
+#	${CMAKE_CURRENT_SOURCE_DIR}/resources
+#	${CMAKE_CURRENT_BINARY_DIR}/web)
 
-add_custom_command(
-	TARGET dummy POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	${CMAKE_CURRENT_BINARY_DIR}/dummy.wasm
-	${CMAKE_CURRENT_BINARY_DIR}/web/index.wasm)
+#add_custom_command(
+#	TARGET dummy POST_BUILD
+#	COMMAND ${CMAKE_COMMAND} -E copy
+#	${CMAKE_CURRENT_BINARY_DIR}/dummy.wasm
+#	${CMAKE_CURRENT_BINARY_DIR}/web/index.wasm)

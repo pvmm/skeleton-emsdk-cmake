@@ -20,10 +20,17 @@ endfunction()
 
 # Configure and build project with emsdk
 function(build_emcc_target)
-	execute_process(
-		COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$ENV{EMROOT}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_C_COMPILER=emcc -B build -S .
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}"
-		COMMAND_ERROR_IS_FATAL ANY)
+	if(NOT ${ARGV1} STREQUAL "")
+		execute_process(
+			COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$ENV{EMROOT}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_C_COMPILER=emcc -DCMAKE_EXE_LINKER_FLAGS=-L${ARGV1} -B build -S . --trace
+			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}"
+			COMMAND_ERROR_IS_FATAL ANY)
+	else()
+		execute_process(
+			COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$ENV{EMROOT}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_C_COMPILER=emcc -B build -S .
+			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}"
+			COMMAND_ERROR_IS_FATAL ANY)
+	endif()
 	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}/build)
 		message(FATAL_ERROR "directory ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}/build not found")
 	endif()
@@ -33,7 +40,7 @@ function(build_emcc_target)
 endfunction()
 
 function(configure_clang_target)
-	message("CLANG_EXE ${CLANG_EXE}")
+	message("CLANG compiler is ${CLANG_EXE}")
 	execute_process(
 		COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_C_COMPILER=${CLANG_EXE} -B build -S .
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}"
@@ -60,6 +67,5 @@ execute_process(COMMAND emcc --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
 
 # Configure and build raylib
 build_emcc_target(raylib)
-
 # Configure dummy project with Emscripten
-configure_clang_target(dummy)
+build_emcc_target(dummy "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/")
