@@ -4,6 +4,10 @@
 #include <assert.h>
 #endif // PLATFORM_DESKTOP
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #define CLAY_EXTEND_CONFIG_RECTANGLE Clay_String link; bool cursorPointer;
 #define CLAY_EXTEND_CONFIG_IMAGE Clay_String sourceURL;
 #define CLAY_EXTEND_CONFIG_TEXT bool disablePointerEvents;
