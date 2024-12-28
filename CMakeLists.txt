@@ -74,4 +74,6 @@ execute_process(COMMAND emcc --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
 # Configure and build raylib
 build_emcc_target(raylib -DCMAKE_BUILD_TYPE=RELEASE)
 # Configure dummy project with Emscripten
-config_clang_target(dummy -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
+#config_clang_target(dummy -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
+build_emcc_target(dummy -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
+
