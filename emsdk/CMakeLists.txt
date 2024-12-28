@@ -14,7 +14,7 @@ function(setupEmsdk)
         PREFIX "${PROJECT_BINARY_DIR}/emsdk"
         CONFIGURE_COMMAND ${EMSDK_DIR}/emsdk install latest
         BUILD_COMMAND ${EMSDK_DIR}/emsdk activate latest
-        INSTALL_COMMAND source ${EMSDK_DIR}/emsdk_env.sh
+        INSTALL_COMMAND "" # source ${EMSDK_DIR}/emsdk_env.sh
     )
 endfunction()
 

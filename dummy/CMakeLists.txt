@@ -26,19 +26,20 @@ if(PLATFORM STREQUAL "Web")
     message("-- Configuring for Web platform...")
     # Web-specific configurations
     set(CMAKE_BUILD_TYPE RELEASE)
-    set(CMAKE_SYSTEM_NAME "Emscripten")
+    #set(CMAKE_SYSTEM_NAME "Emscripten")
     # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
     set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
-    add_compile_definitions(PLATFORM_WEB)
-    add_compile_definitions(PLATFORM=Web)
+    #add_compile_definitions(PLATFORM=PLATFORM_WEB)
     #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s GL_ENABLE_GET_PROC_ADDRESS=1")
-    target_compile_options(dummy PUBLIC --target=wasm32 -Os -DCLAY_WASM -mbulk-memory -nostdlib)
-    target_link_options(dummy PUBLIC --target=wasm32 -Wl,--strip-all -Wl,--export-dynamic -Wl,--no-entry -Wl,--export=__heap_base -Wl,--export=ACTIVE_RENDERER_INDEX -Wl,--initial-memory=16908288)
+    target_compile_options(dummy PUBLIC --target=wasm32 -Wall -Werror -Os -DCLAY_WASM -mbulk-memory -nostdlib)
+    target_link_options(dummy PUBLIC -Wl,--strip-all -Wl,--export-dynamic --export=ACTIVE_RENDERER_INDEX -Wl,--initial-memory=6553600)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     # Desktop-specific configurations
-    add_compile_definitions(PLATFORM_DESKTOP)
-    add_compile_definitions(PLATFORM=Desktop)
+    #add_compile_definitions(PLATFORM=PLATFORM_DESKTOP)
+    target_compile_options(dummy PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop -DPLATFORM_DESKTOP)
+    target_include_directories(dummy PUBLIC .)
+    target_link_libraries(dummy PUBLIC raylib)
 endif()
 
 # Adding Clay
@@ -61,13 +62,6 @@ if(NOT clay_POPULATED)
 	FetchContent_Populate(clay)
 endif()
 include_directories(${clay_SOURCE_DIR})
-
-#set_target_properties(dummy PROPERTIES CMAKE_C_COMPILER clang)
-target_compile_options(dummy PUBLIC -Wall -Werror -Wno-unknown-pragmas)
-target_include_directories(dummy PUBLIC .)
-target_link_libraries(dummy PUBLIC raylib)
-#set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Werror -DCLAY_DEBUG -DPLATFORM")
-#set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 #add_custom_command(
 #	TARGET dummy POST_BUILD
