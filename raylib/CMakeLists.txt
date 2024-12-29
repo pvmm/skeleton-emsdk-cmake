@@ -43,5 +43,10 @@ elseif(PLATFORM STREQUAL "Desktop")
     # Desktop-specific configurations
     message("-- Configuring for Desktop platform...")
     add_compile_definitions(PLATFORM_DESKTOP)
-    set_target_properties(raylib PROPERTIES CMAKE_VERBOSE_MAKEFILE)
+    set_target_properties(raylib PROPERTIES CMAKE_VERBOSE_MAKEFILE ON)
 endif()
+
+message("-- Set RAYLIB_SRC to ${raylib_SOURCE_DIR}/src")
+set(RAYLIB_SRC "${raylib_SOURCE_DIR}/src")
+file(WRITE "${CMAKE_BINARY_DIR}/RAYLIB_SRC.txt" "${RAYLIB_SRC}")
+
