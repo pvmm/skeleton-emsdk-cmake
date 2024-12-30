@@ -25,14 +25,14 @@ add_executable(dummy dummy.c)
 if(PLATFORM STREQUAL "Web")
     message("-- Configuring for Web platform...")
     # Web-specific configurations
-    set(CMAKE_BUILD_TYPE RELEASE)
+    set(CMAKE_BUILD_TYPE DEBUG)
     #set(CMAKE_SYSTEM_NAME "Emscripten")
     # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
     set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
     #add_compile_definitions(PLATFORM=PLATFORM_WEB)
     #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s GL_ENABLE_GET_PROC_ADDRESS=1")
-    target_compile_options(dummy PUBLIC --target=wasm32 -Wall -Werror -Os -DCLAY_WASM -mbulk-memory -nostdlib)
-    target_link_options(dummy PUBLIC --strip-all --export-dynamic --export=__heap_base --export=ACTIVE_RENDERER_INDEX --initial-memory=16908288 -s WASM=1 --no-entry)
+    target_compile_options(dummy PUBLIC --target=wasm32 -Wall -emit-llvm -Os -DCLAY_WASM -mbulk-memory -nostdlib)
+    target_link_options(dummy PUBLIC --strip-all --export-dynamic --export=__heap_base --export=ACTIVE_RENDERER_INDEX --initial-memory=16908288 -s WASM=1 --no-entry -sERROR_ON_UNDEFINED_SYMBOLS=0 -sASSERTIONS) # --alow-undefined
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     # Desktop-specific configurations

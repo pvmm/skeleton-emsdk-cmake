@@ -10,7 +10,7 @@ include(ExternalProject)
 function(setupEmsdk)
     ExternalProject_Add (emsdk
         GIT_REPOSITORY https://github.com/emscripten-core/emsdk
-	GIT_TAG ce1d281ce65b5c7398b17ed6484efc6a3901df6f
+	GIT_TAG main
         PREFIX "${PROJECT_BINARY_DIR}/emsdk"
         CONFIGURE_COMMAND ${EMSDK_DIR}/emsdk install latest
         BUILD_COMMAND ${EMSDK_DIR}/emsdk activate latest
