@@ -66,19 +66,22 @@ elseif(PLATFORM STREQUAL "Desktop")
     target_link_libraries(raygui-app PUBLIC raylib)
 endif()
 
-#add_custom_command(
-#	TARGET dummy POST_BUILD
-#	COMMAND ${CMAKE_COMMAND} -E make_directory
-#	${CMAKE_CURRENT_BINARY_DIR}/web)
+add_custom_command(
+	TARGET raygui-app POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory
+	${CMAKE_CURRENT_BINARY_DIR}/web)
 
-#add_custom_command(
-#	TARGET dummy POST_BUILD
-#	COMMAND ${CMAKE_COMMAND} -E copy_directory
-#	${CMAKE_CURRENT_SOURCE_DIR}/resources
-#	${CMAKE_CURRENT_BINARY_DIR}/web)
+add_custom_command(
+	TARGET raygui-app POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+	${CMAKE_CURRENT_SOURCE_DIR}/resources
+	${CMAKE_CURRENT_BINARY_DIR}/web)
 
-#add_custom_command(
-#	TARGET dummy POST_BUILD
-#	COMMAND ${CMAKE_COMMAND} -E copy
-#	${CMAKE_CURRENT_BINARY_DIR}/dummy.wasm
-#	${CMAKE_CURRENT_BINARY_DIR}/web/index.wasm)
+add_custom_command(
+	TARGET raygui-app POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	${CMAKE_CURRENT_BINARY_DIR}/raygui-app.html
+	${CMAKE_CURRENT_BINARY_DIR}/raygui-app.js
+	${CMAKE_CURRENT_BINARY_DIR}/raygui-app.wasm
+	${CMAKE_CURRENT_BINARY_DIR}/web/)
+
