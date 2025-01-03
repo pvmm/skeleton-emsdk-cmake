@@ -49,4 +49,6 @@ endif()
 message("-- Set RAYLIB_SRC to ${raylib_SOURCE_DIR}/src")
 set(RAYLIB_SRC "${raylib_SOURCE_DIR}/src")
 file(WRITE "${CMAKE_BINARY_DIR}/RAYLIB_SRC.txt" "${RAYLIB_SRC}")
-
+set(RAYLIB_BIN "${raylib_BINARY_DIR}/raylib")
+message("-- Set RAYLIB_BIN to ${raylib_BINARY_DIR}/raylib")
+file(WRITE "${CMAKE_BINARY_DIR}/RAYLIB_BIN.txt" "${RAYLIB_BIN}")

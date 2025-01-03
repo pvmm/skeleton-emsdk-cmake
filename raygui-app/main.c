@@ -5,7 +5,7 @@
 
 int main()
 {
-    InitWindow(400, 200, "raygui - controls test suite");
+    InitWindow(800, 800, "raygui - controls test suite");
     SetTargetFPS(60);
 
     bool showMessageBox = false;

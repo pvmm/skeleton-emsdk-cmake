@@ -61,24 +61,27 @@ endfunction()
 build_target(emsdk)
 set(ENV{EMROOT} "${CMAKE_CURRENT_SOURCE_DIR}/emsdk/build/emsdk/src/emsdk/upstream/emscripten")
 set(ENV{PATH} "$ENV{PATH}:$ENV{EMROOT}")
+set(CMAKE_PROGRAM_PATH $ENV{EMROOT})
 message("-- Added $ENV{EMROOT} to PATH")
-#find_program(CLANG_EXE NAME clang PATH_SUFFIXES $ENV{EMROOT})
-set(CLANG_EXE ${CMAKE_CURRENT_SOURCE_DIR}/emsdk/build/emsdk/src/emsdk/upstream/bin/clang)
-if(CLANG_EXE STREQUAL "CLANG_EXE-NOTFOUND")
-	message(FATAL_ERROR "emsdk clang not found")
+
+# Define clang executable
+if(DEFINED USE_CLANG)
+	find_program(CLANG_EXE NAME clang HINTS $ENV{EMROOT}/../bin REQUIRED)
+	message("Checking if clang works... ${CLANG_EXE}")
+	execute_process(COMMAND ${CLANG_EXE} --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
+	message("-- Found clang executable at ${CLANG_EXE}")
 endif()
-message("-- Found clang executable at ${CLANG_EXE}")
+
 # check if emcc works
 execute_process(COMMAND emcc --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
 
 # Configure and build raylib
-build_emcc_target(raylib -DCMAKE_BUILD_TYPE=RELEASE)
+build_emcc_target(raylib -DCMAKE_BUILD_TYPE=DEBUG)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/RAYLIB_SRC.txt" RAYLIB_SRC)
 set(ENV{INCLUDE_DIRECTORIES} ${RAYLIB_SRC})
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/RAYLIB_BIN.txt" RAYLIB_BIN)
+set(ENV{INCLUDE_DIRECTORIES} ${RAYLIB_BIN})
 
 # Configure raygui-app project with Emscripten
 #config_clang_target(raygui-app -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
-build_emcc_target(raygui-app
-	-DRAYLIB_SRC=${RAYLIB_SRC}
-	-DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
-
+build_emcc_target(raygui-app -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 project(raygui-app C)
-message("-- [raygui-app] RAYLIB_SRC=${RAYLIB_SRC}")
+message("-- RAYLIB_SRC=${RAYLIB_SRC}")
+message("-- RAYLIB_BIN=${RAYLIB_BIN}")
 
 include(FetchContent)
 
@@ -35,7 +36,7 @@ if(NOT raygui_POPULATED)
 	FetchContent_Populate(raygui)
 endif()
 
-add_executable(raygui-app main.c)
+add_executable(raygui-app main.c external/tinyfiledialogs.c)
 message("source_dir ${raygui_SOURCE_DIR}/src")
 target_include_directories(raygui-app PUBLIC ${raygui_SOURCE_DIR}/src)
 
@@ -43,28 +44,27 @@ target_include_directories(raygui-app PUBLIC ${raygui_SOURCE_DIR}/src)
 if(PLATFORM STREQUAL "Web")
     message("-- Configuring for Web platform...")
     # Web-specific configurations
-    set(CMAKE_BUILD_TYPE RELEASE)
-    #set(CMAKE_SYSTEM_NAME "Emscripten")
+    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_SYSTEM_NAME "Emscripten")
     # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
-    set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
-    #add_compile_definitions(PLATFORM=PLATFORM_WEB)
-    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s GL_ENABLE_GET_PROC_ADDRESS=1")
-    target_compile_options(raygui-app PUBLIC --target=wasm32 -Wall -Os -DCLAY_WASM -mbulk-memory -nostdlib -I${RAYLIB_SRC})
-    target_link_options(raygui-app PUBLIC --strip-all --export-dynamic --export=__heap_base --export=ACTIVE_RENDERER_INDEX --initial-memory=16908288 -s WASM=1 --no-entry)
+    set(HTML_SHELL "${CMAKE_SOURCE_DIR}/shell.html")
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    add_compile_definitions(PLATFORM=PLATFORM_WEB)
+    add_compile_definitions(PLATFORM_WEB)
+    add_compile_definitions(_DEFAULT_SOURCE)
+    target_compile_options(raygui-app PUBLIC -Wall -std=c99 -Wno-missing-braces
+        -Wno-unused-value -Wno-pointer-sign -I. -I${RAYLIB_SRC} -Iexternal)
+    target_link_options(raygui-app PUBLIC
+        -L. -L${RAYLIB_BIN} -sUSE_GLFW=3 -sTOTAL_MEMORY=128MB -sSTACK_SIZE=1MB -sFORCE_FILESYSTEM=1 -sASYNCIFY
+        -sASYNCIFY_STACK_SIZE=1048576 -sASSERTIONS=1 --profiling --shell-file ${HTML_SHELL}
+        ${RAYLIB_BIN}/libraylib.a)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     # Desktop-specific configurations
-    #add_compile_definitions(PLATFORM=PLATFORM_DESKTOP)
-    target_compile_options(raygui-app PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop -DPLATFORM_DESKTOP)
+    add_compile_definitions(PLATFORM=PLATFORM_DESKTOP)
+    target_compile_options(raygui-app PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop)
     target_link_libraries(raygui-app PUBLIC raylib)
 endif()
-
-# Adding Clay
-set(FETCHCONTENT_QUIET FALSE)
-#set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
-#set(BUILD_GAMES    OFF CACHE BOOL "" FORCE) # don't build the supplied example games
-
-message("-- [raygui-app] C compiler is ${CMAKE_C_COMPILER}")
 
 #add_custom_command(
 #	TARGET dummy POST_BUILD
