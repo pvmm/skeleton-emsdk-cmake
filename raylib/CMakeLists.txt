@@ -46,6 +46,7 @@ elseif(PLATFORM STREQUAL "Desktop")
     set_target_properties(raylib PROPERTIES CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
+# TODO: use file(GLOB_RECURSE ...) to find the necessary files instead of hardcoding their path
 message("-- Set RAYLIB_SRC to ${raylib_SOURCE_DIR}/src")
 set(RAYLIB_SRC "${raylib_SOURCE_DIR}/src")
 file(WRITE "${CMAKE_BINARY_DIR}/RAYLIB_SRC.txt" "${RAYLIB_SRC}")
