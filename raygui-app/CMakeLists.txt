@@ -20,6 +20,10 @@ if(PLATFORM_INDEX EQUAL -1)
     message(FATAL_ERROR "Invalid PLATFORM: ${PLATFORM}. Supported values are: ${SUPPORTED_PLATFORMS}")
 endif()
 
+set(TOOL_NAME "\"raygui app\"")
+set(TOOL_VERSION "\"0.0.1\"")
+set(TOOL_DESCRIPTION "\"Sample raygui app\"")
+
 # Fetch raygui library
 FetchContent_Declare(
     raygui
@@ -36,9 +40,12 @@ if(NOT raygui_POPULATED)
 	FetchContent_Populate(raygui)
 endif()
 
-add_executable(raygui-app main.c external/tinyfiledialogs.c)
-message("source_dir ${raygui_SOURCE_DIR}/src")
+file(GLOB raygui_SRC "*.h" "*.c")
+add_executable(raygui-app ${raygui_SRC} external/tinyfiledialogs.c)
 target_include_directories(raygui-app PUBLIC ${raygui_SOURCE_DIR}/src)
+add_compile_definitions(TOOL_NAME=${TOOL_NAME})
+add_compile_definitions(TOOL_VERSION=${TOOL_VERSION})
+add_compile_definitions(TOOL_DESCRIPTION=${TOOL_DESCRIPTION})
 
 # Configure platform-specific settings
 if(PLATFORM STREQUAL "Web")
