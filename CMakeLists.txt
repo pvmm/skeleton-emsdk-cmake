@@ -97,13 +97,13 @@ set(ENV{INCLUDE_DIRECTORIES} ${RAYLIB_SRC})
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/RAYLIB_BIN.txt" RAYLIB_BIN)
 set(ENV{INCLUDE_DIRECTORIES} ${RAYLIB_BIN})
 
-# Configure dummy project with Emscripten
+# Configure clay-app project with Emscripten
 if(DEFINED COMPILE_DUMMY)
-	config_clang_target(dummy
+	config_clang_target(clay-app
 		-DCMAKE_VERBOSE_MAKEFILE=ON
 		-DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/
 		-DCMAKE_C_FLAGS=-fuse-ld=${WASM-LD_EXE})
-	#build_emcc_target(dummy -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
+	#build_emcc_target(clay-app -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
 else()
 	# Configure raygui-app project with Emscripten
 	build_emcc_target(raygui-app -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(dummy C)
+project(clay-app C)
 
 include(FetchContent)
 
@@ -22,8 +22,8 @@ if(PLATFORM_INDEX EQUAL -1)
     message(FATAL_ERROR "Invalid PLATFORM: ${PLATFORM}. Supported values are: ${SUPPORTED_PLATFORMS}")
 endif()
 
-message("-- [dummy] C compiler is ${CMAKE_C_COMPILER}")
-add_executable(dummy dummy.c)
+message("-- [clay-app] C compiler is ${CMAKE_C_COMPILER}")
+add_executable(clay-app main.c)
 
 # Configure platform-specific settings
 if(PLATFORM STREQUAL "Web")
@@ -40,18 +40,18 @@ if(PLATFORM STREQUAL "Web")
     string(REPLACE "<OBJECT>" "<OBJECT>.bc" generate_bc ${CMAKE_C_COMPILE_OBJECT})
     set(CMAKE_C_COMPILE_OBJECT "${CMAKE_C_COMPILE_OBJECT} && ${generate_bc} -emit-llvm")
 
-    target_compile_options(dummy PUBLIC --target=wasm32 -Wall -emit-llvm -c -Os -DCLAY_WASM -mbulk-memory --no-standard-libraries) # -isysroot $ENV{EMROOT}/cache/sysroot)
-    target_link_options(dummy PUBLIC --target=wasm32 -Wl,--export-dynamic -Wl,--export=__heap_base -Wl,--export=ACTIVE_RENDERER_INDEX -Wl,--initial-memory=16908288 -Wl,--no-entry -Wl,--strip-all) # -isysroot $ENV{EMROOT}/cache/sysroot)
-    target_link_libraries(dummy $ENV{EMROOT}/cache/sysroot/lib/wasm32-emscripten/crt1.o)
-    #target_link_options(dummy PUBLIC --target=wasm32 -Wl,--export-dynamic -Wl,--export=__heap_base -Wl,--export=ACTIVE_RENDERER_INDEX -Wl,--initial-memory=16908288 -Wl,-sWASM=1 -Wl,--no-entry -Wl,-sERROR_ON_UNDEFINED_SYMBOLS=0 -Wl,-sASSERTIONS) #--alow-undefined)
-    #target_link_options(dummy PUBLIC -Wl,--export-dynamic) #--alow-undefined)
+    target_compile_options(clay-app PUBLIC --target=wasm32 -Wall -emit-llvm -c -Os -DCLAY_WASM -mbulk-memory --no-standard-libraries) # -isysroot $ENV{EMROOT}/cache/sysroot)
+    target_link_options(clay-app PUBLIC --target=wasm32 -Wl,--export-dynamic -Wl,--export=__heap_base -Wl,--export=ACTIVE_RENDERER_INDEX -Wl,--initial-memory=16908288 -Wl,--no-entry -Wl,--strip-all) # -isysroot $ENV{EMROOT}/cache/sysroot)
+    target_link_libraries(clay-app $ENV{EMROOT}/cache/sysroot/lib/wasm32-emscripten/crt1.o)
+    #target_link_options(clay-app PUBLIC --target=wasm32 -Wl,--export-dynamic -Wl,--export=__heap_base -Wl,--export=ACTIVE_RENDERER_INDEX -Wl,--initial-memory=16908288 -Wl,-sWASM=1 -Wl,--no-entry -Wl,-sERROR_ON_UNDEFINED_SYMBOLS=0 -Wl,-sASSERTIONS) #--alow-undefined)
+    #target_link_options(clay-app PUBLIC -Wl,--export-dynamic) #--alow-undefined)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     # Desktop-specific configurations
     #add_compile_definitions(PLATFORM=PLATFORM_DESKTOP)
-    target_compile_options(dummy PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop -DPLATFORM_DESKTOP)
-    target_include_directories(dummy PUBLIC .)
-    target_link_libraries(dummy PUBLIC raylib)
+    target_compile_options(clay-app PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop -DPLATFORM_DESKTOP)
+    target_include_directories(clay-app PUBLIC .)
+    target_link_libraries(clay-app PUBLIC raylib)
 endif()
 
 # Adding Clay
@@ -76,18 +76,18 @@ endif()
 include_directories(${clay_SOURCE_DIR})
 
 #add_custom_command(
-#	TARGET dummy POST_BUILD
+#	TARGET clay-app POST_BUILD
 #	COMMAND ${CMAKE_COMMAND} -E make_directory
 #	${CMAKE_CURRENT_BINARY_DIR}/web)
 
 #add_custom_command(
-#	TARGET dummy POST_BUILD
+#	TARGET clay-app POST_BUILD
 #	COMMAND ${CMAKE_COMMAND} -E copy_directory
 #	${CMAKE_CURRENT_SOURCE_DIR}/resources
 #	${CMAKE_CURRENT_BINARY_DIR}/web)
 
 #add_custom_command(
-#	TARGET dummy POST_BUILD
+#	TARGET clay-app POST_BUILD
 #	COMMAND ${CMAKE_COMMAND} -E copy
-#	${CMAKE_CURRENT_BINARY_DIR}/dummy.wasm
+#	${CMAKE_CURRENT_BINARY_DIR}/clay-app.wasm
 #	${CMAKE_CURRENT_BINARY_DIR}/web/index.wasm)
