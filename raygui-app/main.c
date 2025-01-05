@@ -26,13 +26,14 @@ static const char *tool_description = TOOL_DESCRIPTION;
 static char in_filename[512] = { 0 };
 static char out_filename[512] = { 0 };
 bool save_changes_required = false;
+bool show_message_dialog = false;
 
 int main()
 {
 	(void)tool_description;
 	(void)out_filename;
 
-	InitWindow(800, 800, "raygui - controls test suite");
+	InitWindow(800, 600, "raygui - controls test suite");
 	SetTargetFPS(60);
 
 	bool show_load_file_dialog = false;
@@ -42,6 +43,10 @@ int main()
 	{
 		BeginDrawing();
 		ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+
+		if (show_message_dialog) {
+			if (show_message("got it!") >= 0) show_message_dialog = false;
+		}
 
 		if (show_load_file_dialog) {
 #if defined(CUSTOM_MODAL_DIALOGS) 
@@ -54,6 +59,7 @@ int main()
 				load_file(in_filename);
 				SetWindowTitle(TextFormat("%s v%s | File: %s", tool_name, tool_version, GetFileName(in_filename)));
 				save_changes_required = false;
+				show_message_dialog = true; // tmp
 			}
 
 			if (result >= 0) show_load_file_dialog = false;
