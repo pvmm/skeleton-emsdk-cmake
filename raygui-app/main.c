@@ -36,7 +36,7 @@ int main()
 	SetTargetFPS(60);
 
 	bool show_load_file_dialog = false;
-	bool show_about_box = false;
+	bool show_about_box_dialog = false;
 
 	while (!WindowShouldClose())
 	{
@@ -62,14 +62,11 @@ int main()
 			show_load_file_dialog = true;
 		}
 		if (GuiButton((Rectangle){ 24, 70, 120, 30 }, "#191#About"))
-			show_about_box = true;
+			show_about_box_dialog = true;
 
-		if (show_about_box)
+		if (show_about_box_dialog)
 		{
-			int result = GuiMessageBox((Rectangle){ 275, 350, 250, 100 },
-			        "#191#About", "Hi! This is a message!", "OK");
-
-			if (result >= 0) show_about_box = false;
+			if (show_about_box() >= 0) show_about_box_dialog = false;
 		}
 
 		EndDrawing();
