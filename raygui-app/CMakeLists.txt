@@ -40,9 +40,15 @@ if(NOT raygui_POPULATED)
 	FetchContent_Populate(raygui)
 endif()
 
-file(GLOB raygui_SRC "*.h" "*.c")
-add_executable(raygui-app ${raygui_SRC} external/tinyfiledialogs.c)
-target_include_directories(raygui-app PUBLIC ${raygui_SOURCE_DIR}/src)
+# Get path to raygui.h
+file(GLOB_RECURSE raygui_h ${raygui_SOURCE_DIR} raygui.h)
+list(GET raygui_h 0 raygui_h) # first element of list
+get_filename_component(RAYGUI_SRC ${raygui_h} DIRECTORY)
+message("-- raygui directory set to ${RAYGUI_SRC}")
+
+file(GLOB app_SRC "*.h" "*.c")
+add_executable(raygui-app ${app_SRC} external/tinyfiledialogs.c)
+target_include_directories(raygui-app PUBLIC . ${RAYLIB_SRC} ${RAYGUI_SRC} external)
 add_compile_definitions(TOOL_NAME=${TOOL_NAME})
 add_compile_definitions(TOOL_VERSION=${TOOL_VERSION})
 add_compile_definitions(TOOL_DESCRIPTION=${TOOL_DESCRIPTION})
@@ -59,8 +65,7 @@ if(PLATFORM STREQUAL "Web")
     add_compile_definitions(PLATFORM=PLATFORM_WEB)
     add_compile_definitions(PLATFORM_WEB)
     add_compile_definitions(_DEFAULT_SOURCE)
-    target_compile_options(raygui-app PUBLIC -Wall -std=c99 -Wno-missing-braces
-        -Wno-unused-value -Wno-pointer-sign -I. -I${RAYLIB_SRC} -Iexternal)
+    target_compile_options(raygui-app PUBLIC -Wall -std=c99 -Wno-missing-braces -Wno-unused-value -Wno-pointer-sign)
     target_link_options(raygui-app PUBLIC
         -L. -L${RAYLIB_BIN} -sUSE_GLFW=3 -sTOTAL_MEMORY=128MB -sSTACK_SIZE=1MB -sFORCE_FILESYSTEM=1 -sASYNCIFY
         -sASYNCIFY_STACK_SIZE=1048576 -sASSERTIONS=1 --profiling --shell-file ${HTML_SHELL}
