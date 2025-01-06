@@ -62,7 +62,7 @@ int main()
 	(void)tool_name;
 	(void)tool_version;
 
-	InitWindow(800, 600, "raygui - controls test suite");
+	InitWindow(800, 600, "Raygui Sample App");
 	SetTargetFPS(60);
 
 	bool show_load_file_dialog = false;
