@@ -51,7 +51,7 @@ add_compile_definitions(TOOL_DESCRIPTION=${TOOL_DESCRIPTION})
 if(PLATFORM STREQUAL "Web")
     message("-- Configuring for Web platform...")
     # Web-specific configurations
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE DEBUG)
     set(CMAKE_SYSTEM_NAME "Emscripten")
     # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
     set(HTML_SHELL "${CMAKE_SOURCE_DIR}/shell.html")

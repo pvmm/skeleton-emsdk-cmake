@@ -9,10 +9,10 @@ void load_file(char* filename)
 int show_about_box()
 {
 	fprintf(stderr, "show_about_box() called.");
-	return GuiMessageBox((Rectangle){ 275, 350, 250, 100 }, "#191#About", "Hi! This is a message!", "OK");
+	return GuiMessageBox((Rectangle){ GetScreenWidth() / 2 - 160, GetScreenHeight() / 2 - 120, 320, 120 }, "#191#About", "Hi! This is a message", "OK");
 }
 
-int show_message(char* message)
+int show_message(char* title, char* message)
 {
-	return GuiMessageBox((Rectangle){ 275, 350, 250, 100 }, "#191#Message", message, "OK");
+	return GuiMessageBox((Rectangle){ GetScreenWidth() / 2 - 160, GetScreenHeight() / 2 - 120, 320, 120 }, title, message, "OK");
 }
