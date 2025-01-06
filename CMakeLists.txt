@@ -98,7 +98,7 @@ file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/RAYLIB_BIN.txt" RAYLIB_BIN)
 set(ENV{INCLUDE_DIRECTORIES} ${RAYLIB_BIN})
 
 # Configure clay-app project with Emscripten
-if(DEFINED COMPILE_DUMMY)
+if(DEFINED COMPILE_CLAY_SAMPLE)
 	config_clang_target(clay-app
 		-DCMAKE_VERBOSE_MAKEFILE=ON
 		-DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/
