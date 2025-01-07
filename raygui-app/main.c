@@ -28,10 +28,12 @@ bool save_changes_required = false;
 
 int main()
 {
+	// hide warnings since this is an incomplete example
 	(void)tool_description;
 	(void)out_filename;
 	(void)tool_name;
 	(void)tool_version;
+	(void)in_filename;
 
 	InitWindow(800, 600, "Raygui Sample App");
 	SetTargetFPS(60);
