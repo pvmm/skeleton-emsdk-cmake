@@ -10,15 +10,9 @@
 
 #undef RAYGUI_IMPLEMENTATION                // Avoid including raygui implementation again
 
-#define GUI_FILE_DIALOGS_IMPLEMENTATION
-#include "gui_file_dialogs.h"               // GUI: File Dialogs
-
 #include "functions.h"
 
-#include <stdlib.h>
-
 #define ALLOWED_FILE_EXT    ".txt"
-#define MAX_ERRORS          5
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
@@ -27,33 +21,10 @@ static const char* tool_name = TOOL_NAME;
 static const char* tool_version = TOOL_VERSION;
 static const char* tool_description = TOOL_DESCRIPTION;
 
-static char *error_messages[MAX_ERRORS] = { NULL };
-static int error_index = -1;
-
 // NOTE: Max length depends on OS, in Windows MAX_PATH = 256
 static char in_filename[512] = { 0 };
 static char out_filename[512] = { 0 };
-bool save_changes_required = false;
-
-void append_error_message(char* fmt, ...)
-{
-	if (error_index < MAX_ERRORS)
-	{
-		va_list ap;
-		va_start(ap, fmt);
-		error_messages[++error_index] = malloc(256);
-		vsnprintf(error_messages[error_index], 256, fmt, ap);
-		va_end(ap);
-	}
-}
-
-void drop_error_message()
-{
-	if (error_index > -1)
-	{
-		free(error_messages[error_index--]);
-	}
-}
+//bool save_changes_required = false;
 
 int main()
 {
@@ -65,35 +36,28 @@ int main()
 	InitWindow(800, 600, "Raygui Sample App");
 	SetTargetFPS(60);
 
-	bool show_load_file_dialog = false;
-	bool show_about_box_dialog = false;
+	bool request_load_dialog = false;
+	bool request_about_box = false;
 
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
 		ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
-		if (!show_load_file_dialog && IsFileDropped())
+		process_errors();
+
+		//disable_gui(has_error() || request_load_dialog || show_about_box_dialog);
+		if (show_button((Rectangle){ 24, 24, 120, 30 }, "#11#Open file..."))
 		{
-			append_error_message("%s", "Unexpected file dragging. Click on the \"Open File...\" button first.");
-			UnloadDroppedFiles(LoadDroppedFiles());
+			printf("bla!\n");
+			request_load_dialog = true;
 		}
-		if (error_index >= 0)
-		{
-			if (show_message("Error", error_messages[error_index]) != -1)
-			{
-				drop_error_message();
-			}
-		}
-		if (GuiButton((Rectangle){ 24, 24, 120, 30 }, "#11#Open file...") && error_index == -1)
-		{
-			show_load_file_dialog = true;
-		}
-		if (show_load_file_dialog)
+
+		//disable_gui(has_error() || show_about_box_dialog);
+		int result;
+		if (request_load_dialog && (result = show_load_dialog("Load file", in_filename, "*.txt")))
 		{
 #if defined(CUSTOM_MODAL_DIALOGS) 
-			int result = GuiFileDialog(DIALOG_MESSAGE, "Load file", in_filename, "OK",
-							"Just drag and drop your file!");
 			if (result == -1 && IsFileDropped())
 			{
 				FilePathList dropped_files = LoadDroppedFiles();
@@ -108,12 +72,10 @@ int main()
 						append_error_message("Wrong file type: %s", get_file_name(dropped_files.paths[i]));
 					}
 				}
-				UnloadDroppedFiles(dropped_files);
-				show_load_file_dialog = false;
+				unload_dropped_files();
+				reset_gui_lock(P_FILE_DIALOG);
 			}
 #else
-			int result = GuiFileDialog(DIALOG_OPEN_FILE, "Load file", in_filename, "*.*", "All files (*.*)");
-//#endif
 			if (result == 1)
 			{
 				load_file(in_filename);
@@ -121,16 +83,20 @@ int main()
 				save_changes_required = false;
 			}
 #endif
-			if (result >= 0) show_load_file_dialog = false;
+			if (result >= 0) request_load_dialog = false;
 		}
-		if (GuiButton((Rectangle){ 24, 70, 120, 30 }, "#191#About"))
-			show_about_box_dialog = true;
 
-		if (show_about_box_dialog)
+		//disable_gui(has_error() || request_load_dialog || show_about_box_dialog);
+		if (show_button((Rectangle){ 24, 70, 120, 30 }, "#191#About..."))
+			request_about_box = true;
+
+		//disable_gui(has_error() || request_load_dialog);
+		if (request_about_box && show_about_box() >= 0)
 		{
-			if (show_about_box() >= 0) show_about_box_dialog = false;
+			request_about_box = false;
 		}
 
+		//disable_gui(false);
 		EndDrawing();
 	}
 
