@@ -45,14 +45,17 @@ bool has_error(void)
 
 void append_error_message(char* fmt, ...)
 {
-	if (error_index < MAX_ERRORS)
+	if (error_index >= MAX_ERRORS)
 	{
-		va_list ap;
-		va_start(ap, fmt);
-		error_messages[++error_index] = malloc(256);
-		vsnprintf(error_messages[error_index], 256, fmt, ap);
-		va_end(ap);
+		printf("Max error count reached.");
+		return;
 	}
+
+	va_list ap;
+	va_start(ap, fmt);
+	error_messages[++error_index] = malloc(256);
+	vsnprintf(error_messages[error_index], 256, fmt, ap);
+	va_end(ap);
 }
 
 void drop_error_message(void)
@@ -65,24 +68,28 @@ void drop_error_message(void)
 
 int show_about_box()
 {
+	if (has_error() || gui_status(P_ERR_DIALOG)) return -1;
+	int result = -1;
+
 	if (IsFileDropped())
 	{
 		set_gui_lock(P_ERR_DIALOG);
 		append_error_message("Unexpected file dragging. Click on the \"Open File...\" button first.");
 		UnloadDroppedFiles(LoadDroppedFiles());
-		return -1;
-	} else if (gui_status(P_DEFAULT)) {
+	} else {
+		disable_gui_if(false);
 		set_gui_lock(P_MSG_DIALOG);
-		return GuiMessageBox(
+		result = GuiMessageBox(
 			(Rectangle){ GetScreenWidth() / 2 - 200, GetScreenHeight() / 2 - 180, 400, 180 },
 			"#191#About", "Hi! This is a message", "OK");
+		if (result >= 0) reset_gui_lock(P_MSG_DIALOG);
 	}
-	return -1;
+	return result;
 }
 
 int show_button(Rectangle bounds, const char *text)
 {
-        disable_gui_if(has_error() || gui_status_not(P_DEFAULT));
+	disable_gui_if(has_error() || gui_status_not(P_DEFAULT));
 	return GuiButton(bounds, text);
 }
 
@@ -100,19 +107,21 @@ int show_error(char* message)
 int show_message(char* title, char* message)
 {
 	if (has_error() || gui_status(P_ERR_DIALOG)) return -1;
-        //disable_gui_if(gui_status_not(P_MSG_DIALOG) && gui_status_not(P_DEFAULT));
+
+	int result = -1;
 	if (IsFileDropped())
 	{
 		set_gui_lock(P_ERR_DIALOG);
-		append_error_message("Unexpected file dragging. Click on the \"Open File...\" button first.");
-		UnloadDroppedFiles(LoadDroppedFiles());
-		return 0;
+		append_error_message("Unexpected file dragging. Click on the \"Open File...\" button instead.");
+		unload_dropped_files();
 	} else {
 		set_gui_lock(P_MSG_DIALOG);
-		return GuiMessageBox(
+		result = GuiMessageBox(
 			(Rectangle){ GetScreenWidth() / 2 - 200, GetScreenHeight() / 2 - 180, 400, 180 },
 			title, message, "OK");
+		if (result >= 0) reset_gui_lock(P_MSG_DIALOG);
 	}
+	return result;
 }
 
 int show_load_dialog(const char* title, const char* extension, FilePathList* files)
@@ -135,7 +144,6 @@ int show_load_dialog(const char* title, const char* extension, FilePathList* fil
 #if defined(CUSTOM_MODAL_DIALOGS) 
 	int result = GuiFileDialog(DIALOG_MESSAGE, title, filename, "OK", "Just drag and drop your file!");
 	// process wrong file input
-	//if (result == -1 && IsFileDropped())
 	if (IsFileDropped())
 	{
 		*files = LoadDroppedFiles();
