@@ -21,12 +21,9 @@
 static enum priority priority = P_DEFAULT;
 static char *error_messages[MAX_ERRORS] = { NULL };
 static int error_index = -1;
-static bool save_changes_required = false;
-static bool about_box_flag = false;
 
 void process_errors(void)
 {
-	printf("priority = %i\n", priority);
 	if (gui_status_not(P_FILE_DIALOG) && IsFileDropped())
 	{
 		append_error_message("Unexpected file dragging. Click on the \"Open File...\" button first.");
@@ -80,6 +77,7 @@ int show_about_box()
 			(Rectangle){ GetScreenWidth() / 2 - 200, GetScreenHeight() / 2 - 180, 400, 180 },
 			"#191#About", "Hi! This is a message", "OK");
 	}
+	return -1;
 }
 
 int show_button(Rectangle bounds, const char *text)
@@ -91,9 +89,12 @@ int show_button(Rectangle bounds, const char *text)
 int show_error(char* message)
 {
 	set_gui_lock(P_ERR_DIALOG);
-	return GuiMessageBox(
+	disable_gui_if(false); // error dialog has maximum priority
+	int result = GuiMessageBox(
 		(Rectangle){ GetScreenWidth() / 2 - 200, GetScreenHeight() / 2 - 180, 400, 180 },
 		"Error", message, "OK");
+	if (result >= 0) reset_gui_lock(P_ERR_DIALOG);
+	return result;
 }
 
 int show_message(char* title, char* message)
@@ -114,19 +115,56 @@ int show_message(char* title, char* message)
 	}
 }
 
-int show_load_dialog(const char *title, char *filename, const char *filters)
+int show_load_dialog(const char* title, const char* extension, FilePathList* files)
 {
-	if (has_error()) return -1;
-        disable_gui_if(gui_status_not(P_FILE_DIALOG) && gui_status_not(P_DEFAULT));
+	static bool load_error = false;
+
+	// disable on error
+	if (has_error())
+		return -1;
+	// reset status after load error
+	if (load_error) {
+		load_error = false;
+		return -1;
+	}
+
+	disable_gui_if(gui_status_not(P_FILE_DIALOG) && gui_status_not(P_DEFAULT));
 	set_gui_lock(P_FILE_DIALOG);
+
+	char filename[512] = { 0 };
 #if defined(CUSTOM_MODAL_DIALOGS) 
 	int result = GuiFileDialog(DIALOG_MESSAGE, title, filename, "OK", "Just drag and drop your file!");
-	printf("result = %i\n", result);
-	if (result >= 0) reset_gui_lock(P_FILE_DIALOG);
+	// process wrong file input
+	//if (result == -1 && IsFileDropped())
+	if (IsFileDropped())
+	{
+		*files = LoadDroppedFiles();
+		for (int i = 0; i < files->count; ++i)
+		{
+			if (!IsFileExtension(files->paths[i], extension))
+			{
+				append_error_message("Wrong file type: %s", get_file_name(files->paths[i]));
+			}
+		}
+		if (has_error())
+		{
+			// reset dragged files on error
+			unload_dropped_files();
+			result = -1;
+			load_error = true;
+		} else {
+			result = files->count;
+		}
+	} else if (result == 1) {
+		result = 0;
+	}
 #else
+	char filters[10];
+	snprintf(filters, 10, "*%s", extension);
 	int result = GuiFileDialog(DIALOG_OPEN_FILE, title, filename, filters, message);
-	if (result >= 0) reset_gui_lock(P_FILE_DIALOG);
 #endif
+	// reset status after modal
+	if (result >= 0) reset_gui_lock(P_FILE_DIALOG);
 	return result;
 }
 
@@ -178,7 +216,7 @@ void mayble_block_gui(void)
 
 void load_file(char* filename)
 {
-	printf("function load_file(%s) called\n", filename);
+	printf("function load_file(%s) called\n", get_file_name(filename));
 }
 
 void disable_gui_if(bool cond)

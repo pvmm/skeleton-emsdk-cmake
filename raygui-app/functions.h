@@ -17,7 +17,7 @@ int show_about_box(void);
 
 int show_message(char* title, char* message);
 
-int show_load_dialog(const char *title, char *filename, const char *filters);
+int show_load_dialog(const char* title, const char* extension, FilePathList* files);
 
 //
 // priority handling
