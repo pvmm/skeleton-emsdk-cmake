@@ -8,9 +8,6 @@ include(FetchContent)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_C_STANDARD 17)
 
-# Define the PLATFORM option
-set(PLATFORM "Web" CACHE STRING "Target platform for compilation: web or desktop")
-
 # Supported platforms
 set(SUPPORTED_PLATFORMS "Web" "Desktop") # "Android" "Raspberry")
 
@@ -58,7 +55,6 @@ if(PLATFORM STREQUAL "Web")
     # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
     set(HTML_SHELL "${CMAKE_SOURCE_DIR}/shell.html")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
-    add_compile_definitions(PLATFORM=PLATFORM_WEB)
     add_compile_definitions(PLATFORM_WEB)
     add_compile_definitions(_DEFAULT_SOURCE)
     target_compile_options(raygui-app PUBLIC -Wall -std=c99 -Wno-missing-braces -Wno-unused-value -Wno-pointer-sign)
@@ -66,30 +62,27 @@ if(PLATFORM STREQUAL "Web")
         -L. -L${RAYLIB_BIN} -sUSE_GLFW=3 -sTOTAL_MEMORY=128MB -sSTACK_SIZE=1MB -sFORCE_FILESYSTEM=1 -sASYNCIFY
         -sASYNCIFY_STACK_SIZE=1048576 -sASSERTIONS=1 --profiling --shell-file ${HTML_SHELL}
         ${RAYLIB_BIN}/libraylib.a)
+    add_custom_command(
+        TARGET raygui-app POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/web)
+    add_custom_command(
+        TARGET raygui-app POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources
+        ${CMAKE_CURRENT_BINARY_DIR}/web)
+    add_custom_command(
+        TARGET raygui-app POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.html
+        ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.js
+        ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.wasm
+        ${CMAKE_CURRENT_BINARY_DIR}/web/)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     # Desktop-specific configurations
-    add_compile_definitions(PLATFORM=PLATFORM_DESKTOP)
+    add_compile_definitions(PLATFORM_DESKTOP)
     target_compile_options(raygui-app PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop)
-    target_link_libraries(raygui-app PUBLIC raylib)
+    target_link_libraries(raygui-app PUBLIC raylib -lm)
 endif()
-
-add_custom_command(
-	TARGET raygui-app POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-	${CMAKE_CURRENT_BINARY_DIR}/web)
-
-add_custom_command(
-	TARGET raygui-app POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-	${CMAKE_CURRENT_SOURCE_DIR}/resources
-	${CMAKE_CURRENT_BINARY_DIR}/web)
-
-add_custom_command(
-	TARGET raygui-app POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	${CMAKE_CURRENT_BINARY_DIR}/raygui-app.html
-	${CMAKE_CURRENT_BINARY_DIR}/raygui-app.js
-	${CMAKE_CURRENT_BINARY_DIR}/raygui-app.wasm
-	${CMAKE_CURRENT_BINARY_DIR}/web/)
 

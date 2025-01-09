@@ -8,6 +8,8 @@
 
 #include "functions.h"
 
+#include <stddef.h>
+#include <string.h>
 #define GUI_FILE_DIALOGS_IMPLEMENTATION
 #include "gui_file_dialogs.h"               // GUI: File Dialogs
 
@@ -169,7 +171,7 @@ int show_load_dialog(const char* title, const char* extension, FilePathList* fil
 #else
 	char filters[10];
 	snprintf(filters, 10, "*%s", extension);
-	int result = GuiFileDialog(DIALOG_OPEN_FILE, title, filename, filters, message);
+	int result = GuiFileDialog(DIALOG_OPEN_FILE, title, filename, filters, "All files (*.*)");
 #endif
 	// reset status after modal
 	if (result >= 0) reset_gui_lock(P_FILE_DIALOG);

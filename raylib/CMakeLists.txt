@@ -6,7 +6,7 @@ include(ExternalProject)
 set(FETCHCONTENT_QUIET FALSE)
 
 # Define the PLATFORM option
-set(PLATFORM "Web" CACHE STRING "Target platform for compilation: Web or Desktop")
+#set(PLATFORM Desktop CACHE STRING "Target platform for compilation: Web or Desktop")
 
 # Supported platforms
 set(SUPPORTED_PLATFORMS "Web" "Desktop") # "Android" "Raspberry")
