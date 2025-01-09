@@ -37,16 +37,16 @@ if(PLATFORM STREQUAL "Web")
         CMAKE_TOOLCHAIN_FILE ${EMROOT}/cmake/Modules/Platform/Emscripten.cmake
         CMAKE_C_COMPILER emcc)
 elseif(PLATFORM STREQUAL "Desktop")
-    # Desktop-specific configurations
     message("-- Configuring for Desktop platform...")
     add_compile_definitions(PLATFORM_DESKTOP)
     set_target_properties(raylib PROPERTIES CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-# fake target forces raylib to compile
+# A fake target forces raylib to compile
 add_executable(raylib_ tmp.c)
 target_link_libraries(raylib_ PUBLIC raylib)
 
+# Send raylib variables upstream to the root project
 add_custom_command(
     TARGET raylib_ POST_BUILD
     COMMAND ${CMAKE_COMMAND}
