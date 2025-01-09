@@ -3,4 +3,11 @@ Skeleton CMAKE project that downloads and uses Emscripten to compile raylib weba
 ```
 $ cmake -B build -S .
 ```
-Replace "raygui-app" in the root CMakeLists.txt with your subdirectory containing your C/C++ code.
+Replace `raygui-app` in the root `CMakeLists.txt` with your subdirectory containing your C/C++ code.
+
+# Running raygui-app compiled to webassembly
+To execute raygui-app in the browser, you need a http server. Just execute this inside the `build/web` directory:
+```
+python -m http.server 8080
+```
+and point the browser to `localhost:8080` and click on the **raygui-app.html** file.

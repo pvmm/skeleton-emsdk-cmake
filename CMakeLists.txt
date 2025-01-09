@@ -1,14 +1,17 @@
 cmake_minimum_required(VERSION 3.15)
 project(BaseProject)
 
+# get build directory name
+get_filename_component(BIN_DIR ${CMAKE_CURRENT_BINARY_DIR} NAME)
+
 function(configure_target)
 	set(TARGET "${ARGV0}")
 	list(REMOVE_AT ARGV 0)
-	execute_process(COMMAND cmake -B build -S . ${ARGV}
+	execute_process(COMMAND cmake -B ${BIN_DIR} -S . ${ARGV}
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}"
 		COMMAND_ERROR_IS_FATAL ANY)
-	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/build)
-		message(FATAL_ERROR "directory ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/build not found")
+	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR})
+		message(FATAL_ERROR "directory ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR} not found")
 	endif()
 endfunction()
 
@@ -16,7 +19,7 @@ endfunction()
 function(build_target)
 	configure_target(${ARGV})
 	execute_process(COMMAND make
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}/build"
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}/${BIN_DIR}"
 		COMMAND_ERROR_IS_FATAL ANY)
 endfunction()
 
@@ -29,14 +32,14 @@ function(build_emcc_target)
 	set(TARGET "${ARGV0}")
 	list(REMOVE_AT ARGV 0)
 	execute_process(
-		COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$ENV{EMROOT}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_C_COMPILER=emcc ${ARGV} -B build -S .
+		COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$ENV{EMROOT}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_C_COMPILER=emcc ${ARGV} -B ${BIN_DIR} -S .
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}"
 		COMMAND_ERROR_IS_FATAL ANY)
-	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/build)
-		message(FATAL_ERROR "directory ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/build not found")
+	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR})
+		message(FATAL_ERROR "directory ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR} not found")
 	endif()
 	execute_process(COMMAND make
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/build"
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR}"
 		COMMAND_ERROR_IS_FATAL ANY)
 endfunction()
 
@@ -49,11 +52,11 @@ function(config_clang_target)
 	set(TARGET "${ARGV0}")
 	list(REMOVE_AT ARGV 0)
 	execute_process(
-		COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_C_COMPILER=${CLANG_EXE} ${ARGV} -B build -S . --trace
+		COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_C_COMPILER=${CLANG_EXE} ${ARGV} -B ${BIN_DIR} -S .
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}"
 		COMMAND_ERROR_IS_FATAL ANY)
-	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/build)
-		message(FATAL_ERROR "directory ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/build not found")
+	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR})
+		message(FATAL_ERROR "directory ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR} not found")
 	endif()
 endfunction()
 
@@ -68,7 +71,7 @@ endif()
 if(DEFINED USE_EMCC)
 	# Install emsdk and update EMROOT and PATH
 	build_target(emsdk)
-	set(ENV{EMROOT} ${CMAKE_CURRENT_SOURCE_DIR}/emsdk/build/emsdk/src/emsdk/upstream/emscripten)
+	set(ENV{EMROOT} ${CMAKE_CURRENT_SOURCE_DIR}/emsdk/${BIN_DIR}/emsdk/src/emsdk/upstream/emscripten)
 	set(ENV{PATH} "$ENV{PATH}:$ENV{EMROOT}")
 	set(CMAKE_PROGRAM_PATH $ENV{EMROOT})
 	message("-- Added $ENV{EMROOT} to PATH")
@@ -101,8 +104,8 @@ else()
 endif()
 
 # Get raylib options back
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/RAYLIB_SRC.txt" RAYLIB_SRC)
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/RAYLIB_BIN.txt" RAYLIB_BIN)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/RAYLIB_SRC.txt" RAYLIB_SRC)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/RAYLIB_BIN.txt" RAYLIB_BIN)
 
 message("PLATFORM=${PLATFORM}")
 if(DEFINED USE_EMCC)
@@ -117,7 +120,7 @@ endif()
 if(DEFINED COMPILE_CLAY_SAMPLE)
 	config_clang_target(clay-app
 		-DCMAKE_VERBOSE_MAKEFILE=ON
-		-DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/
+		-DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/_deps/raylib-build/raylib/
 		-DCMAKE_C_FLAGS=-fuse-ld=${WASM-LD_EXE})
-	#build_emcc_target(clay-app -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
+	#build_emcc_target(clay-app -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/_deps/raylib-build/raylib/)
 endif()
