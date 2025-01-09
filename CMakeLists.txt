@@ -55,47 +55,62 @@ function(config_clang_target)
 	endif()
 endfunction()
 
+#
 # Configure and build project
+#
 
-# Install emsdk and update EMROOT and PATH
-build_target(emsdk)
-set(ENV{EMROOT} ${CMAKE_CURRENT_SOURCE_DIR}/emsdk/build/emsdk/src/emsdk/upstream/emscripten)
-set(ENV{PATH} "$ENV{PATH}:$ENV{EMROOT}")
-set(CMAKE_PROGRAM_PATH $ENV{EMROOT})
-message("-- Added $ENV{EMROOT} to PATH")
+if(PLATFORM STREQUAL Web)
+	set(USE_EMCC ON)
+endif()
 
-# Define clang executables
-if(DEFINED USE_CLANG)
-	#find_program(WASM-LD_EXE NAME wasm-ld HINTS $ENV{EMROOT}/../bin REQUIRED)
-	set(WASM-LD_EXE ${CMAKE_CURRENT_SOURCE_DIR}/emsdk/build/emsdk/src/emsdk/upstream/bin/wasm-ld)
+if(DEFINED USE_EMCC)
+	# Install emsdk and update EMROOT and PATH
+	build_target(emsdk)
+	set(ENV{EMROOT} ${CMAKE_CURRENT_SOURCE_DIR}/emsdk/build/emsdk/src/emsdk/upstream/emscripten)
+	set(ENV{PATH} "$ENV{PATH}:$ENV{EMROOT}")
+	set(CMAKE_PROGRAM_PATH $ENV{EMROOT})
+	message("-- Added $ENV{EMROOT} to PATH")
+
+	# check if emcc works
+	execute_process(COMMAND emcc --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
+
+	# Configure and build raylib
+	build_emcc_target(raylib -DCMAKE_BUILD_TYPE=DEBUG)
+else()
+	# Define clang executables
+	find_program(WASM-LD_EXE NAME wasm-ld)
 	if(WASM-LD_EXE STREQUAL "WASM-LD_EXE-NOTFOUND")
 		message(FATAL_ERROR "wasm-ld linker not found")
 	else()
 		message("-- Linker set to ${WASM-LD_EXE}")
 	endif()
-	#find_program(CLANG_EXE NAME clang HINTS $ENV{EMROOT}/../bin REQUIRED)
-	set(CLANG_EXE ${CMAKE_CURRENT_SOURCE_DIR}/emsdk/build/emsdk/src/emsdk/upstream/bin/clang)
+	find_program(CLANG_EXE NAME clang)
 	if(CLANG_EXE STREQUAL "CLANG_EXE-NOTFOUND")
-		message(FATAL_ERROR "emsdk clang not found")
+		message(FATAL_ERROR "clang not found")
 	else()
 		message("-- Compiler set to ${CLANG_EXE}")
 	endif()
 	message("-- Checking if clang works... ${CLANG_EXE}")
 	execute_process(COMMAND ${CLANG_EXE} --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
 	message("-- Found clang executable at ${CLANG_EXE}")
+
+	# Configure and build raylib
+	build_target(raylib -DCMAKE_BUILD_TYPE=DEBUG)
 endif()
-
-# check if emcc works
-execute_process(COMMAND emcc --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
-
-# Configure and build raylib
-build_emcc_target(raylib -DCMAKE_BUILD_TYPE=DEBUG)
 
 # Get raylib options back
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/RAYLIB_SRC.txt" RAYLIB_SRC)
 set(ENV{INCLUDE_DIRECTORIES} ${RAYLIB_SRC})
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/RAYLIB_BIN.txt" RAYLIB_BIN)
 set(ENV{INCLUDE_DIRECTORIES} ${RAYLIB_BIN})
+
+if(DEFINED USE_EMCC)
+	# Configure raygui-app project with Emscripten
+	build_emcc_target(raygui-app -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})
+else()
+	# Configure raygui-app project with Emscripten
+	build_target(raygui-app -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})
+endif()
 
 # Configure clay-app project with Emscripten
 if(DEFINED COMPILE_CLAY_SAMPLE)
@@ -104,7 +119,4 @@ if(DEFINED COMPILE_CLAY_SAMPLE)
 		-DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/
 		-DCMAKE_C_FLAGS=-fuse-ld=${WASM-LD_EXE})
 	#build_emcc_target(clay-app -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/build/_deps/raylib-build/raylib/)
-else()
-	# Configure raygui-app project with Emscripten
-	build_emcc_target(raygui-app -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})
 endif()

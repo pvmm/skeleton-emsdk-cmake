@@ -34,11 +34,7 @@ FetchContent_Declare(
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
 )
-FetchContent_GetProperties(raygui)
-if(NOT raygui_POPULATED)
-	#cmake_policy(SET CMP0169 OLD)
-	FetchContent_Populate(raygui)
-endif()
+FetchContent_MakeAvailable(raygui)
 
 # Get path to raygui.h
 file(GLOB_RECURSE raygui_h ${raygui_SOURCE_DIR} raygui.h)

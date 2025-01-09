@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(raylib C)
+project(raylib_ C)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 include(FetchContent)
 include(ExternalProject)
@@ -46,16 +46,11 @@ elseif(PLATFORM STREQUAL "Desktop")
     set_target_properties(raylib PROPERTIES CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-# Get path to raylib.h
-file(GLOB_RECURSE raylib_h ${raylib_SOURCE_DIR} raylib.h)
-list(GET raylib_h 0 raylib_h)
-get_filename_component(RAYLIB_SRC ${raylib_h} DIRECTORY)
-message("-- Set RAYLIB_SRC to ${RAYLIB_SRC}")
-file(WRITE "${CMAKE_BINARY_DIR}/RAYLIB_SRC.txt" "${RAYLIB_SRC}")
+# fake target forces raylib to compile
+add_executable(raylib_ tmp.c)
+target_link_libraries(raylib_ PUBLIC raylib)
 
-# Get path to libraylib.a
-file(GLOB_RECURSE raylib_a ${raylib_BINARY_DIR} libraylib.a)
-list(GET raylib_a 0 raylib_a)
-get_filename_component(RAYLIB_BIN ${raylib_a} DIRECTORY)
-message("-- Set RAYLIB_BIN to ${RAYLIB_BIN}")
-file(WRITE "${CMAKE_BINARY_DIR}/RAYLIB_BIN.txt" "${RAYLIB_BIN}")
+add_custom_command(
+    TARGET raylib_ POST_BUILD
+    COMMAND ${CMAKE_COMMAND}
+    ARGS -D raylib_SOURCE_DIR=${raylib_SOURCE_DIR} -D raylib_BINARY_DIR=${raylib_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/vars.cmake)
