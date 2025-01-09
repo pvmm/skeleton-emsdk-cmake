@@ -111,11 +111,11 @@ if(DEFINED USE_EMCC)
 	# Configure raygui-app project with Emscripten
 	build_emcc_target(raygui-app -DPLATFORM=${PLATFORM} -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})
 else()
-	# Configure raygui-app project with Emscripten
+	# Configure raygui-app project with clang
 	build_target(raygui-app -DPLATFORM=${PLATFORM} -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})
 endif()
 
-# Configure clay-app project with Emscripten
+# Configure clay-app project with clang
 if(DEFINED COMPILE_CLAY_SAMPLE)
 	config_clang_target(clay-app
 		-DCMAKE_VERBOSE_MAKEFILE=ON
