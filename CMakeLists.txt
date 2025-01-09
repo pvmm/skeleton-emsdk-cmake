@@ -107,7 +107,6 @@ endif()
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/RAYLIB_SRC.txt" RAYLIB_SRC)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/RAYLIB_BIN.txt" RAYLIB_BIN)
 
-message("PLATFORM=${PLATFORM}")
 if(DEFINED USE_EMCC)
 	# Configure raygui-app project with Emscripten
 	build_emcc_target(raygui-app -DPLATFORM=${PLATFORM} -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})
@@ -122,5 +121,4 @@ if(DEFINED COMPILE_CLAY_SAMPLE)
 		-DCMAKE_VERBOSE_MAKEFILE=ON
 		-DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/_deps/raylib-build/raylib/
 		-DCMAKE_C_FLAGS=-fuse-ld=${WASM-LD_EXE})
-	#build_emcc_target(clay-app -DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/_deps/raylib-build/raylib/)
 endif()
