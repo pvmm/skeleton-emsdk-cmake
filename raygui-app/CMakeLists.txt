@@ -49,10 +49,8 @@ add_compile_definitions(TOOL_DESCRIPTION=${TOOL_DESCRIPTION})
 # Configure platform-specific settings
 if(PLATFORM STREQUAL "Web")
     message("-- Configuring for Web platform...")
-    # Web-specific configurations
     set(CMAKE_BUILD_TYPE DEBUG)
     set(CMAKE_SYSTEM_NAME "Emscripten")
-    # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
     set(HTML_SHELL "${CMAKE_SOURCE_DIR}/shell.html")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     add_compile_definitions(PLATFORM_WEB)
@@ -62,6 +60,7 @@ if(PLATFORM STREQUAL "Web")
         -L. -L${RAYLIB_BIN} -sUSE_GLFW=3 -sTOTAL_MEMORY=128MB -sSTACK_SIZE=1MB -sFORCE_FILESYSTEM=1 -sASYNCIFY
         -sASYNCIFY_STACK_SIZE=1048576 -sASSERTIONS=1 --profiling --shell-file ${HTML_SHELL}
         ${RAYLIB_BIN}/libraylib.a)
+    # copy files to web directory
     add_custom_command(
         TARGET raygui-app POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory
@@ -80,7 +79,6 @@ if(PLATFORM STREQUAL "Web")
         ${CMAKE_CURRENT_BINARY_DIR}/web/)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
-    # Desktop-specific configurations
     add_compile_definitions(PLATFORM_DESKTOP)
     target_compile_options(raygui-app PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop)
     target_link_libraries(raygui-app PUBLIC raylib -lm)
