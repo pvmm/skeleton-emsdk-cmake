@@ -24,6 +24,12 @@ static enum priority priority = P_DEFAULT;
 static char *error_messages[MAX_ERRORS] = { NULL };
 static int error_index = -1;
 
+#if defined(PLATFORM_DESKTOP)
+static FilePathList _files = { 0 };
+static char _filename[512] = { 0 };
+static char* _paths[1]     = { NULL };
+#endif
+
 void process_errors(void)
 {
 	if (gui_status_not(P_FILE_DIALOG) && IsFileDropped())
@@ -142,7 +148,6 @@ int show_load_dialog(const char* title, const char* extension, FilePathList* fil
 	disable_gui_if(gui_status_not(P_FILE_DIALOG) && gui_status_not(P_DEFAULT));
 	set_gui_lock(P_FILE_DIALOG);
 
-	char filename[512] = { 0 };
 #if defined(CUSTOM_MODAL_DIALOGS) 
 	int result = GuiFileDialog(DIALOG_MESSAGE, title, filename, "OK", "Just drag and drop your file!");
 	// process wrong file input
@@ -171,7 +176,11 @@ int show_load_dialog(const char* title, const char* extension, FilePathList* fil
 #else
 	char filters[10];
 	snprintf(filters, 10, "*%s", extension);
-	int result = GuiFileDialog(DIALOG_OPEN_FILE, title, filename, filters, "All files (*.*)");
+	int result = GuiFileDialog(DIALOG_OPEN_FILE, title, _filename, filters, "All files (*.*)");
+	files = &_files;
+	files->count = 1;
+	files->paths = _paths;
+	files->paths[0] = _filename;
 #endif
 	// reset status after modal
 	if (result >= 0) reset_gui_lock(P_FILE_DIALOG);
@@ -243,5 +252,9 @@ void disable_gui_if(bool cond)
 
 void unload_dropped_files(void)
 {
+#if defined(PLATFORM_WEB)
 	UnloadDroppedFiles(LoadDroppedFiles());
+#else
+	_files.count = 0;
+#endif
 }

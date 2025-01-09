@@ -63,7 +63,7 @@ int main()
 				{
 					load_file(files.paths[0]);
 				}
-				SetWindowTitle(TextFormat("%s v%s | File: %s", tool_name, tool_version, GetFileName(in_filename)));
+				SetWindowTitle(TextFormat("%s v%s | File: %s", tool_name, tool_version, GetFileName(files.paths[0])));
 #ifdef CUSTOM_MODAL_DIALOGS
 				unload_dropped_files();
 #endif
