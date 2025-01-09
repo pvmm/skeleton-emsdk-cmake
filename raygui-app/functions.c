@@ -176,11 +176,11 @@ int show_load_dialog(const char* title, const char* extension, FilePathList* fil
 #else
 	char filters[10];
 	snprintf(filters, 10, "*%s", extension);
-	int result = GuiFileDialog(DIALOG_OPEN_FILE, title, _filename, filters, "All files (*.*)");
-	files = &_files;
-	files->count = 1;
-	files->paths = _paths;
-	files->paths[0] = _filename;
+	int result = GuiFileDialog(DIALOG_OPEN_FILE, title, _filename, filters, "Text files (*.txt)");
+	_files.paths = _paths;
+	_files.paths[0] = _filename;
+	_files.count = 1;
+	*files = _files;
 #endif
 	// reset status after modal
 	if (result >= 0) reset_gui_lock(P_FILE_DIALOG);
@@ -254,7 +254,5 @@ void unload_dropped_files(void)
 {
 #if defined(PLATFORM_WEB)
 	UnloadDroppedFiles(LoadDroppedFiles());
-#else
-	_files.count = 0;
 #endif
 }
