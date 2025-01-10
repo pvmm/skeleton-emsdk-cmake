@@ -63,20 +63,20 @@ if(PLATFORM STREQUAL "Web")
     # copy files to web directory
     add_custom_command(
         TARGET raygui-app POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-        ${CMAKE_CURRENT_BINARY_DIR}/web)
-    add_custom_command(
-        TARGET raygui-app POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/resources
-        ${CMAKE_CURRENT_BINARY_DIR}/web)
+	${CMAKE_CURRENT_SOURCE_DIR}/../docs)
     add_custom_command(
         TARGET raygui-app POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.html
+	${CMAKE_CURRENT_SOURCE_DIR}/../docs/index.html)
+    add_custom_command(
+        TARGET raygui-app POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.js
         ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.wasm
-        ${CMAKE_CURRENT_BINARY_DIR}/web/)
+	${CMAKE_CURRENT_SOURCE_DIR}/../docs)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     set(CMAKE_BUILD_TYPE DEBUG)
