@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.27)
-project(raygui-app C)
+
+set(PROJECT index)
+project(${PROJECT} C)
+
 message("-- RAYLIB_SRC=${RAYLIB_SRC}")
 message("-- RAYLIB_BIN=${RAYLIB_BIN}")
 
@@ -40,8 +43,8 @@ get_filename_component(RAYGUI_SRC ${raygui_h} DIRECTORY)
 message("-- raygui directory set to ${RAYGUI_SRC}")
 
 file(GLOB app_SRC "*.h" "*.c")
-add_executable(raygui-app ${app_SRC} external/tinyfiledialogs.c)
-target_include_directories(raygui-app PUBLIC . ${RAYLIB_SRC} ${RAYGUI_SRC} external)
+add_executable(${PROJECT} ${app_SRC} external/tinyfiledialogs.c)
+target_include_directories(${PROJECT} PUBLIC . ${RAYLIB_SRC} ${RAYGUI_SRC} external)
 add_compile_definitions(TOOL_NAME=${TOOL_NAME})
 add_compile_definitions(TOOL_VERSION=${TOOL_VERSION})
 add_compile_definitions(TOOL_DESCRIPTION=${TOOL_DESCRIPTION})
@@ -55,33 +58,33 @@ if(PLATFORM STREQUAL "Web")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     add_compile_definitions(PLATFORM_WEB)
     add_compile_definitions(_DEFAULT_SOURCE)
-    target_compile_options(raygui-app PUBLIC -Wall -std=c99 -Wno-missing-braces -Wno-unused-value -Wno-pointer-sign)
-    target_link_options(raygui-app PUBLIC
+    target_compile_options(${PROJECT} PUBLIC -Wall -std=c99 -Wno-missing-braces -Wno-unused-value -Wno-pointer-sign)
+    target_link_options(${PROJECT} PUBLIC
         -L. -L${RAYLIB_BIN} -sUSE_GLFW=3 -sTOTAL_MEMORY=128MB -sSTACK_SIZE=1MB -sFORCE_FILESYSTEM=1 -sASYNCIFY
         -sASYNCIFY_STACK_SIZE=1048576 -sASSERTIONS=1 --profiling --shell-file ${HTML_SHELL}
         ${RAYLIB_BIN}/libraylib.a)
     # copy files to web directory
     add_custom_command(
-        TARGET raygui-app POST_BUILD
+        TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/resources
 	${CMAKE_CURRENT_SOURCE_DIR}/../docs)
     add_custom_command(
-        TARGET raygui-app POST_BUILD
+        TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.html
+        ${CMAKE_CURRENT_BINARY_DIR}/index.html
 	${CMAKE_CURRENT_SOURCE_DIR}/../docs/index.html)
     add_custom_command(
-        TARGET raygui-app POST_BUILD
+        TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.js
-        ${CMAKE_CURRENT_BINARY_DIR}/raygui-app.wasm
+        ${CMAKE_CURRENT_BINARY_DIR}/index.js
+        ${CMAKE_CURRENT_BINARY_DIR}/index.wasm
 	${CMAKE_CURRENT_SOURCE_DIR}/../docs)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     set(CMAKE_BUILD_TYPE DEBUG)
     add_compile_definitions(PLATFORM_DESKTOP)
-    target_compile_options(raygui-app PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop)
-    target_link_libraries(raygui-app PUBLIC raylib -lm)
+    target_compile_options(${PROJECT} PUBLIC -Wall -Werror -Wno-unknown-pragmas -DPLATFORM=Desktop)
+    target_link_libraries(${PROJECT} PUBLIC raylib -lm)
 endif()
 

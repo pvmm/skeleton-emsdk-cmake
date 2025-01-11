@@ -623,7 +623,7 @@ function createExportWrapper(name, nargs) {
 // include: runtime_exceptions.js
 // end include: runtime_exceptions.js
 function findWasmBinary() {
-    var f = 'raygui-app.wasm';
+    var f = 'index.wasm';
     if (!isDataURI(f)) {
       return locateFile(f);
     }
