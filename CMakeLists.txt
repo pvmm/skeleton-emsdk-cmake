@@ -63,14 +63,26 @@ function(config_clang_target)
 	execute_process(
 		COMMAND ${CMAKE_COMMAND}
 			-DCMAKE_C_COMPILER=${CLANG_EXE}
-			${ARGV}
 			-B ${BIN_DIR}
 			-S .
+			${ARGV}
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}"
 		COMMAND_ERROR_IS_FATAL ANY)
 	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR})
 		message(FATAL_ERROR "directory ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR} not found")
 	endif()
+endfunction()
+
+function(build_clang_target)
+	if(${ARGC} EQUAL 0)
+		message(FATAL_ERROR "missing argument: target name")
+	endif()
+	set(TARGET "${ARGV0}")
+	config_clang_target(${ARGV})
+	execute_process(
+		COMMAND ${CMAKE_COMMAND} --build ${BIN_DIR}
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}"
+		COMMAND_ERROR_IS_FATAL ANY)
 endfunction()
 
 #
@@ -142,7 +154,7 @@ endif()
 # Configure clay-app project with clang
 if(${COMPILE_CLAY_APP} STREQUAL 1)
 	message("-- Compiling clay-app...")
-	config_clang_target(clay-app
+	build_clang_target(clay-app
 		-DPLATFORM=${PLATFORM}
 		-DRAYLIB_SRC=${RAYLIB_SRC}
 		-DRAYLIB_BIN=${RAYLIB_BIN}

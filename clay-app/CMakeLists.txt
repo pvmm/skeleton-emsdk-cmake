@@ -16,6 +16,7 @@ if(PLATFORM_INDEX EQUAL -1)
 endif()
 
 message("-- [clay-app] C compiler is ${CMAKE_C_COMPILER}")
+message("-- [clay-app] linker is ${LINKER}")
 add_executable(clay-app main.c)
 
 # just download clay, don't do anything else
@@ -30,10 +31,6 @@ ExternalProject_Get_property(clay SOURCE_DIR)
 include_directories(${SOURCE_DIR})
 # this step is needed to force the download
 add_dependencies(clay-app clay)
-
-add_custom_command(
-    TARGET clay POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "-- clay installation finished")
 
 # Configure platform-specific settings
 if(PLATFORM STREQUAL Web)
