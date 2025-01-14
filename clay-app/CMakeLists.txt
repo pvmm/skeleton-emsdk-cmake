@@ -18,6 +18,7 @@ endif()
 message("-- [clay-app] C compiler is ${CMAKE_C_COMPILER}")
 add_executable(clay-app main.c)
 
+# just download clay, don't do anything else
 ExternalProject_Add(clay
     GIT_REPOSITORY "git@github.com:nicbarker/clay.git"
     GIT_TAG "main"
@@ -27,6 +28,7 @@ ExternalProject_Add(clay
 )
 ExternalProject_Get_property(clay SOURCE_DIR)
 include_directories(${SOURCE_DIR})
+# This step is needed to download clay
 add_dependencies(clay-app clay)
 
 add_custom_command(

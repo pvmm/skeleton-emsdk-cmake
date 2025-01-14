@@ -8,9 +8,9 @@ set(EMSDK_DIR "${CMAKE_BINARY_DIR}/emsdk/src/emsdk" CACHE PATH "Directory to ins
 include(ExternalProject)
 
 function(setupEmsdk)
-    ExternalProject_Add (emsdk
+    ExternalProject_Add(emsdk
         GIT_REPOSITORY https://github.com/emscripten-core/emsdk
-	GIT_TAG main
+        GIT_TAG main
         PREFIX "${PROJECT_BINARY_DIR}/emsdk"
         CONFIGURE_COMMAND ${EMSDK_DIR}/emsdk install latest
         BUILD_COMMAND ${EMSDK_DIR}/emsdk activate latest

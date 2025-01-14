@@ -68,9 +68,12 @@ endfunction()
 # Configure and build project
 #
 
+# webassembly apps need emscripten
 if(PLATFORM STREQUAL Web)
 	set(USE_EMCC ON)
 endif()
+
+# clay app needs clang
 if(COMPILE_CLAY_APP STREQUAL 1)
 	set(USE_CLANG ON)
 endif()
@@ -123,7 +126,7 @@ endif()
 
 # Configure clay-app project with clang
 if(${COMPILE_CLAY_APP} STREQUAL 1)
-	message("-- Compiling clay-app")
+	message("-- Compiling clay-app...")
 	config_clang_target(clay-app
 		-DPLATFORM=${PLATFORM}
 		-DLINKER=${WASM-LD_EXE}
