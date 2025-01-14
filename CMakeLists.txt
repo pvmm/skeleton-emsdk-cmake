@@ -4,7 +4,7 @@ project(BaseProject)
 # get build directory name
 get_filename_component(BIN_DIR ${CMAKE_CURRENT_BINARY_DIR} NAME)
 
-function(configure_target)
+function(config_target)
 	set(TARGET "${ARGV0}")
 	list(REMOVE_AT ARGV 0)
 	execute_process(COMMAND ${CMAKE_COMMAND} -B ${BIN_DIR} -S . ${ARGV}
@@ -17,7 +17,7 @@ endfunction()
 
 # Configure and build project
 function(build_target)
-	configure_target(${ARGV})
+	config_target(${ARGV})
 	execute_process(COMMAND ${CMAKE_COMMAND} --build ${BIN_DIR}
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}"
 		COMMAND_ERROR_IS_FATAL ANY)
@@ -52,7 +52,11 @@ function(config_clang_target)
 	set(TARGET "${ARGV0}")
 	list(REMOVE_AT ARGV 0)
 	execute_process(
-		COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_C_COMPILER=${CLANG_EXE} ${ARGV} -B ${BIN_DIR} -S .
+		COMMAND ${CMAKE_COMMAND}
+			-DCMAKE_C_COMPILER=${CLANG_EXE}
+			${ARGV}
+			-B ${BIN_DIR}
+			-S .
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}"
 		COMMAND_ERROR_IS_FATAL ANY)
 	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR})
@@ -66,6 +70,9 @@ endfunction()
 
 if(PLATFORM STREQUAL Web)
 	set(USE_EMCC ON)
+endif()
+if(COMPILE_CLAY_APP STREQUAL 1)
+	set(USE_CLANG ON)
 endif()
 
 if(DEFINED USE_EMCC)
@@ -81,7 +88,9 @@ if(DEFINED USE_EMCC)
 
 	# Configure and build raylib
 	build_emcc_target(raylib -DPLATFORM=Web -DCMAKE_BUILD_TYPE=DEBUG)
-else()
+endif()
+
+if(DEFINED USE_CLANG)
 	# Define clang executables
 	find_program(WASM-LD_EXE NAMES wasm-ld)
 	if(WASM-LD_EXE STREQUAL "WASM-LD_EXE-NOTFOUND")
@@ -98,9 +107,6 @@ else()
 	message("-- Checking if clang works... ${CLANG_EXE}")
 	execute_process(COMMAND ${CLANG_EXE} --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
 	message("-- Found clang executable at ${CLANG_EXE}")
-
-	# Configure and build raylib
-	build_target(raylib -DPLATFORM=Desktop -DCMAKE_BUILD_TYPE=DEBUG)
 endif()
 
 # Get raylib options back
@@ -116,9 +122,10 @@ else()
 endif()
 
 # Configure clay-app project with clang
-if(DEFINED COMPILE_CLAY_SAMPLE)
+if(${COMPILE_CLAY_APP} STREQUAL 1)
+	message("-- Compiling clay-app")
 	config_clang_target(clay-app
-		-DCMAKE_VERBOSE_MAKEFILE=ON
-		-DCMAKE_EXE_LINKER_FLAGS=-L${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/_deps/raylib-build/raylib/
-		-DCMAKE_C_FLAGS=-fuse-ld=${WASM-LD_EXE})
+		-DPLATFORM=${PLATFORM}
+		-DLINKER=${WASM-LD_EXE}
+		-DCMAKE_VERBOSE_MAKEFILE=ON)
 endif()
