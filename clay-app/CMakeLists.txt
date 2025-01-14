@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
-project(clay-app C)
+
+set(PROJECT clay-app)
+project(${PROJECT} C)
 
 include(ExternalProject)
 
@@ -15,9 +17,9 @@ if(PLATFORM_INDEX EQUAL -1)
     message(FATAL_ERROR "Invalid PLATFORM: ${PLATFORM}. Supported values are: ${SUPPORTED_PLATFORMS}")
 endif()
 
-message("-- [clay-app] C compiler is ${CMAKE_C_COMPILER}")
-message("-- [clay-app] linker is ${LINKER}")
-add_executable(clay-app main.c)
+message("-- ${PROJECT}: C compiler is ${CMAKE_C_COMPILER}")
+message("-- ${PROJECT}: linker is ${LINKER}")
+add_executable(${PROJECT} main.c)
 
 # just download clay, don't do anything else
 ExternalProject_Add(clay
@@ -30,7 +32,7 @@ ExternalProject_Add(clay
 ExternalProject_Get_property(clay SOURCE_DIR)
 include_directories(${SOURCE_DIR})
 # this step is needed to force the download
-add_dependencies(clay-app clay)
+add_dependencies(${PROJECT} clay)
 
 # Configure platform-specific settings
 if(PLATFORM STREQUAL Web)
@@ -39,7 +41,7 @@ if(PLATFORM STREQUAL Web)
     add_compile_definitions(PLATFORM_WEB)
     set(CMAKE_BUILD_TYPE DEBUG)
     set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
-    target_compile_options(clay-app
+    target_compile_options(${PROJECT}
         PUBLIC
         --target=wasm32
         -fuse-ld=${LINKER}
@@ -51,44 +53,42 @@ if(PLATFORM STREQUAL Web)
         --no-standard-libraries
         -nostdlib)
     # -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s GL_ENABLE_GET_PROC_ADDRESS=1
-    target_link_options(clay-app
+    target_link_options(${PROJECT}
         PUBLIC
         --target=wasm32
-    -nostdlib
-    -Wl,--strip-all
+        -nostdlib
+        -Wl,--strip-all
         -Wl,--export-dynamic
         -Wl,--no-entry
         -Wl,--export=__heap_base
         -Wl,--export=ACTIVE_RENDERER_INDEX
         -Wl,--initial-memory=16908288)
     # -Wl,-sWASM=1 -Wl,-sERROR_ON_UNDEFINED_SYMBOLS=0 -Wl,-sASSERTIONS --alow-undefined
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/web)
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources
+        ${CMAKE_CURRENT_BINARY_DIR}/web)
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+	${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}.wasm
+        ${CMAKE_CURRENT_BINARY_DIR}/web/index.wasm)
 elseif(PLATFORM STREQUAL Desktop)
     message("-- Configuring for Desktop platform...")
     add_compile_definitions(PLATFORM_DESKTOP)
     set(CMAKE_BUILD_TYPE DEBUG)
-    target_compile_options(clay-app
+    target_compile_options(${PROJECT}
         PUBLIC
         -Wall
         -Werror
         -Wno-unknown-pragmas)
-    target_include_directories(clay-app PUBLIC . ${RAYLIB_SRC})
-    target_link_options(clay-app PUBLIC -L${RAYLIB_BIN})
-    target_link_libraries(clay-app PUBLIC -lraylib)
+    target_include_directories(${PROJECT} PUBLIC . ${RAYLIB_SRC})
+    target_link_options(${PROJECT} PUBLIC -L${RAYLIB_BIN})
+    target_link_libraries(${PROJECT} PUBLIC -lraylib)
 endif()
 
-#add_custom_command(
-#    TARGET clay-app POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E make_directory
-#    ${CMAKE_CURRENT_BINARY_DIR}/web)
-
-#add_custom_command(
-#    TARGET clay-app POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_directory
-#    ${CMAKE_CURRENT_SOURCE_DIR}/resources
-#    ${CMAKE_CURRENT_BINARY_DIR}/web)
-
-#add_custom_command(
-#    TARGET clay-app POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy
-#    ${CMAKE_CURRENT_BINARY_DIR}/clay-app.wasm
-#    ${CMAKE_CURRENT_BINARY_DIR}/web/index.wasm)
