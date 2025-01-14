@@ -40,6 +40,7 @@ if(PLATFORM STREQUAL Web)
     # Web-specific configurations
     add_compile_definitions(PLATFORM_WEB)
     set(CMAKE_BUILD_TYPE DEBUG)
+    set_target_properties(${PROJECT} PROPERTIES OUTPUT_NAME "index")
     set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
     target_compile_options(${PROJECT}
         PUBLIC
@@ -66,18 +67,15 @@ if(PLATFORM STREQUAL Web)
     # -Wl,-sWASM=1 -Wl,-sERROR_ON_UNDEFINED_SYMBOLS=0 -Wl,-sASSERTIONS --alow-undefined
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-        ${CMAKE_CURRENT_BINARY_DIR}/web)
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/resources
-        ${CMAKE_CURRENT_BINARY_DIR}/web)
+        ${CMAKE_CURRENT_SOURCE_DIR}/../docs/${PROJECT})
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-	${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}.wasm
-        ${CMAKE_CURRENT_BINARY_DIR}/web/index.wasm)
+        ${CMAKE_CURRENT_SOURCE_DIR}/index.html
+        ${CMAKE_CURRENT_BINARY_DIR}/index.wasm
+        ${CMAKE_CURRENT_SOURCE_DIR}/../docs/${PROJECT})
 elseif(PLATFORM STREQUAL Desktop)
     message("-- Configuring for Desktop platform...")
     add_compile_definitions(PLATFORM_DESKTOP)

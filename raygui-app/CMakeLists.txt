@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27)
 
-set(PROJECT index)
+set(PROJECT raygui-app)
 project(${PROJECT} C)
 
 message("-- RAYLIB_SRC=${RAYLIB_SRC}")
@@ -58,6 +58,7 @@ if(PLATFORM STREQUAL "Web")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     add_compile_definitions(PLATFORM_WEB)
     add_compile_definitions(_DEFAULT_SOURCE)
+    set_target_properties(${PROJECT} PROPERTIES OUTPUT_NAME "index")
     target_compile_options(${PROJECT} PUBLIC -Wall -std=c99 -Wno-unused-value -Wno-pointer-sign)
     target_link_options(${PROJECT} PUBLIC
         -L. -L${RAYLIB_BIN} -sUSE_GLFW=3 -sTOTAL_MEMORY=128MB -sSTACK_SIZE=1MB -sFORCE_FILESYSTEM=1 -sASYNCIFY
@@ -68,18 +69,14 @@ if(PLATFORM STREQUAL "Web")
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/resources
-	${CMAKE_CURRENT_SOURCE_DIR}/../docs)
+	${CMAKE_CURRENT_BINARY_DIR}/web)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/index.html
-	${CMAKE_CURRENT_SOURCE_DIR}/../docs/index.html)
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_BINARY_DIR}/index.js
         ${CMAKE_CURRENT_BINARY_DIR}/index.wasm
-	${CMAKE_CURRENT_SOURCE_DIR}/../docs)
+	${CMAKE_CURRENT_BINARY_DIR}/web)
 elseif(PLATFORM STREQUAL "Desktop")
     message("-- Configuring for Desktop platform...")
     set(CMAKE_BUILD_TYPE DEBUG)
