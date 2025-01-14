@@ -28,7 +28,7 @@ ExternalProject_Add(clay
 )
 ExternalProject_Get_property(clay SOURCE_DIR)
 include_directories(${SOURCE_DIR})
-# This step is needed to download clay
+# this step is needed to force the download
 add_dependencies(clay-app clay)
 
 add_custom_command(
@@ -66,7 +66,7 @@ if(PLATFORM STREQUAL Web)
         -Wl,--initial-memory=16908288)
     # -Wl,-sWASM=1 -Wl,-sERROR_ON_UNDEFINED_SYMBOLS=0 -Wl,-sASSERTIONS --alow-undefined
 elseif(PLATFORM STREQUAL Desktop)
-    message(FATAL_ERROR "-- Configuring for Desktop platform...")
+    message("-- Configuring for Desktop platform...")
     add_compile_definitions(PLATFORM_DESKTOP)
     set(CMAKE_BUILD_TYPE DEBUG)
     target_compile_options(clay-app
@@ -74,8 +74,9 @@ elseif(PLATFORM STREQUAL Desktop)
         -Wall
         -Werror
         -Wno-unknown-pragmas)
-    target_include_directories(clay-app PUBLIC .)
-    target_link_libraries(clay-app PUBLIC raylib)
+    target_include_directories(clay-app PUBLIC . ${RAYLIB_SRC})
+    target_link_options(clay-app PUBLIC -L${RAYLIB_BIN})
+    target_link_libraries(clay-app PUBLIC -lraylib)
 endif()
 
 #add_custom_command(

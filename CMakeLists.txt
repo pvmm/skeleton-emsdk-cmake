@@ -7,7 +7,10 @@ get_filename_component(BIN_DIR ${CMAKE_CURRENT_BINARY_DIR} NAME)
 function(config_target)
 	set(TARGET "${ARGV0}")
 	list(REMOVE_AT ARGV 0)
-	execute_process(COMMAND ${CMAKE_COMMAND} -B ${BIN_DIR} -S . ${ARGV}
+	execute_process(COMMAND ${CMAKE_COMMAND}
+			-B ${BIN_DIR}
+			-S .
+			${ARGV}
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}"
 		COMMAND_ERROR_IS_FATAL ANY)
 	if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR}")
@@ -32,7 +35,13 @@ function(build_emcc_target)
 	set(TARGET "${ARGV0}")
 	list(REMOVE_AT ARGV 0)
 	execute_process(
-		COMMAND ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_TOOLCHAIN_FILE=$ENV{EMROOT}/cmake/Modules/Platform/Emscripten.cmake -DCMAKE_C_COMPILER=emcc ${ARGV} -B ${BIN_DIR} -S .
+		COMMAND ${CMAKE_COMMAND}
+			-DCMAKE_VERBOSE_MAKEFILE=ON
+			-DCMAKE_TOOLCHAIN_FILE=$ENV{EMROOT}/cmake/Modules/Platform/Emscripten.cmake
+			-DCMAKE_C_COMPILER=emcc
+			-B ${BIN_DIR}
+			-S .
+			${ARGV}
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}"
 		COMMAND_ERROR_IS_FATAL ANY)
 	if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}/${BIN_DIR})
@@ -118,10 +127,16 @@ file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/RAYLIB_BIN.txt" RAYLIB_
 
 if(DEFINED USE_EMCC)
 	# Configure raygui-app project with Emscripten
-	build_emcc_target(raygui-app -DPLATFORM=${PLATFORM} -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})
+	build_emcc_target(raygui-app
+		-DPLATFORM=${PLATFORM}
+		-DRAYLIB_SRC=${RAYLIB_SRC}
+		-DRAYLIB_BIN=${RAYLIB_BIN})
 else()
 	# Configure raygui-app project with clang
-	build_target(raygui-app -DPLATFORM=${PLATFORM} -DRAYLIB_SRC=${RAYLIB_SRC} -DRAYLIB_BIN=${RAYLIB_BIN})
+	build_target(raygui-app
+		-DPLATFORM=${PLATFORM}
+		-DRAYLIB_SRC=${RAYLIB_SRC}
+		-DRAYLIB_BIN=${RAYLIB_BIN})
 endif()
 
 # Configure clay-app project with clang
@@ -129,6 +144,8 @@ if(${COMPILE_CLAY_APP} STREQUAL 1)
 	message("-- Compiling clay-app...")
 	config_clang_target(clay-app
 		-DPLATFORM=${PLATFORM}
+		-DRAYLIB_SRC=${RAYLIB_SRC}
+		-DRAYLIB_BIN=${RAYLIB_BIN}
 		-DLINKER=${WASM-LD_EXE}
 		-DCMAKE_VERBOSE_MAKEFILE=ON)
 endif()
