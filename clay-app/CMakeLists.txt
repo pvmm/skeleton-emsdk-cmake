@@ -57,10 +57,7 @@ if(PLATFORM STREQUAL Web)
         -emit-llvm
         -Os
         -DCLAY_WASM
-        -mbulk-memory
-        --no-standard-libraries
-        -nostdlib)
-    # -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s ASYNCIFY -s GL_ENABLE_GET_PROC_ADDRESS=1
+        -mbulk-memory)
     target_link_options(${PROJECT}
         PUBLIC
         --target=wasm32
@@ -71,7 +68,6 @@ if(PLATFORM STREQUAL Web)
         -Wl,--export=__heap_base
         -Wl,--export=ACTIVE_RENDERER_INDEX
         -Wl,--initial-memory=16908288)
-    # -Wl,-sWASM=1 -Wl,-sERROR_ON_UNDEFINED_SYMBOLS=0 -Wl,-sASSERTIONS --alow-undefined
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
          COMMAND ${CMAKE_COMMAND} -E copy_directory
