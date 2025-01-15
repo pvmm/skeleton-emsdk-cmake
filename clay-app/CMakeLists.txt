@@ -42,6 +42,13 @@ if(PLATFORM STREQUAL Web)
     set(CMAKE_BUILD_TYPE DEBUG)
     set_target_properties(${PROJECT} PROPERTIES OUTPUT_NAME "index")
     set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
+    add_compile_definitions(BASE="skeleton-emsdk-cmake/clay-app/")
+    # expand @URL@ macro from index.html.in to index.html
+    set(URL "https://pvmm.github.io/skeleton-emsdk-cmake/clay-app/")
+    #set(URL "http://localhost:8080/")
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/index.html.in" INDEX_HTML)
+    string(REPLACE @URL@ ${URL} INDEX_HTML "${INDEX_HTML}")
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/index.html" "${INDEX_HTML}")
     target_compile_options(${PROJECT}
         PUBLIC
         --target=wasm32
@@ -67,19 +74,18 @@ if(PLATFORM STREQUAL Web)
     # -Wl,-sWASM=1 -Wl,-sERROR_ON_UNDEFINED_SYMBOLS=0 -Wl,-sASSERTIONS --alow-undefined
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources
-        ${CMAKE_CURRENT_SOURCE_DIR}/../docs/${PROJECT})
-    add_custom_command(
-        TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/index.html
-        ${CMAKE_CURRENT_BINARY_DIR}/index.wasm
-        ${CMAKE_CURRENT_SOURCE_DIR}/../docs/${PROJECT})
+         COMMAND ${CMAKE_COMMAND} -E copy_directory
+         ${CMAKE_CURRENT_SOURCE_DIR}/resources
+         ${CMAKE_CURRENT_SOURCE_DIR}/../docs/${PROJECT})
+     add_custom_command(
+         TARGET ${PROJECT} POST_BUILD
+         COMMAND ${CMAKE_COMMAND} -E copy
+         ${CMAKE_CURRENT_BINARY_DIR}/index.html
+         ${CMAKE_CURRENT_BINARY_DIR}/index.wasm
+         ${CMAKE_CURRENT_SOURCE_DIR}/../docs/${PROJECT})
 elseif(PLATFORM STREQUAL Desktop)
     message("-- Configuring for Desktop platform...")
     add_compile_definitions(PLATFORM_DESKTOP)
-    add_compile_definitions(BASE="/clay/")
     set(CMAKE_BUILD_TYPE DEBUG)
     target_compile_options(${PROJECT}
         PUBLIC
