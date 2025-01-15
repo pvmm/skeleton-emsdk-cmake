@@ -8,9 +8,8 @@ Replace `raygui-app` in the root `CMakeLists.txt` with your subdirectory contain
 
 # Running raygui-app compiled to webassembly
 
-To execute raygui-app in the browser, you need a http server. Just execute this inside the `build/web` directory:
+You can access the latest version [here](https://pvmm.github.io/skeleton-emsdk-cmake/) or you can execute raygui-app locally, but you need a http server. Just execute this inside the `build` directory:
 ```
 python -m http.server 8080
 ```
-and point the browser to `localhost:8080` or you can just access the latest version [here](https://pvmm.github.io/skeleton-emsdk-cmake/)
-
+and point the browser to `localhost:8080`
