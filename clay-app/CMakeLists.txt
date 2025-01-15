@@ -42,7 +42,7 @@ if(PLATFORM STREQUAL Web)
     set(CMAKE_BUILD_TYPE DEBUG)
     set_target_properties(${PROJECT} PROPERTIES OUTPUT_NAME "index")
     set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
-    add_compile_definitions(BASE="skeleton-emsdk-cmake/clay-app/")
+    #add_compile_definitions(BASE="skeleton-emsdk-cmake/clay-app/")
     # expand @URL@ macro from index.html.in to index.html
     set(URL "https://pvmm.github.io/skeleton-emsdk-cmake/clay-app/")
     #set(URL "http://localhost:8080/")
