@@ -79,6 +79,7 @@ if(PLATFORM STREQUAL Web)
 elseif(PLATFORM STREQUAL Desktop)
     message("-- Configuring for Desktop platform...")
     add_compile_definitions(PLATFORM_DESKTOP)
+    add_compile_definitions(BASE="/clay/")
     set(CMAKE_BUILD_TYPE DEBUG)
     target_compile_options(${PROJECT}
         PUBLIC
