@@ -89,6 +89,6 @@ elseif(PLATFORM STREQUAL Desktop)
         -Wno-unknown-pragmas)
     target_include_directories(${PROJECT} PUBLIC . ${RAYLIB_SRC})
     target_link_options(${PROJECT} PUBLIC -L${RAYLIB_BIN})
-    target_link_libraries(${PROJECT} PUBLIC -lraylib)
+    target_link_libraries(${PROJECT} PUBLIC -lraylib -lm)
 endif()
 
