@@ -3,6 +3,10 @@
 #define CLAY_EXTEND_CONFIG_TEXT bool disablePointerEvents;
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
+#ifdef PLATFORM_DESKTOP
+#include "renderers/raylib/clay_renderer_raylib.c"
+#endif
+
 
 double windowWidth = 1024, windowHeight = 768;
 float modelPageOneZRotation = 0;
@@ -157,6 +161,7 @@ void DeclarativeSyntaxPageMobile() {
     }
 }
 
+#ifdef PLATFORM_WEB
 Clay_Color ColorLerp(Clay_Color a, Clay_Color b, float amount) {
     return (Clay_Color) {
         .r = a.r + (b.r - a.r) * amount,
@@ -165,6 +170,7 @@ Clay_Color ColorLerp(Clay_Color a, Clay_Color b, float amount) {
         .a = a.a + (b.a - a.a) * amount,
     };
 }
+#endif
 
 Clay_String LOREM_IPSUM_TEXT = CLAY_STRING("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
 
@@ -458,7 +464,54 @@ CLAY_WASM_EXPORT("UpdateDrawFrame") Clay_RenderCommandArray UpdateDrawFrame(floa
     //----------------------------------------------------------------------------------
 }
 
+#ifdef PLATFORM_DESKTOP
+bool reinitializeClay = false;
+
+void HandleClayErrors(Clay_ErrorData errorData) {
+    printf("%s", errorData.errorText.chars);
+    if (errorData.errorType == CLAY_ERROR_TYPE_ELEMENTS_CAPACITY_EXCEEDED) {
+        reinitializeClay = true;
+        Clay_SetMaxElementCount(Clay_GetMaxElementCount() * 2);
+    } else if (errorData.errorType == CLAY_ERROR_TYPE_TEXT_MEASUREMENT_CAPACITY_EXCEEDED) {
+        reinitializeClay = true;
+        Clay_SetMaxMeasureTextCacheWordCount(Clay_GetMaxMeasureTextCacheWordCount() * 2);
+    }
+}
+
 // Dummy main() to please cmake - TODO get wasm working with cmake on this example
-int main() {
+int main(void) {
+    uint64_t totalMemorySize = Clay_MinMemorySize();
+    Clay_Arena clayMemory = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, malloc(totalMemorySize));
+    Clay_SetMeasureTextFunction(Raylib_MeasureText);
+    Clay_Initialize(clayMemory, (Clay_Dimensions) { (float)GetScreenWidth(), (float)GetScreenHeight() }, (Clay_ErrorHandler) { HandleClayErrors });
+    Clay_Raylib_Initialize(1024, 768, "Official Clay Website", FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT);
+
+    double currentTime;
+    double oldTime;
+
+    // Main game loop
+    while (!WindowShouldClose())    // Detect window close button or ESC key
+    {
+        Clay_Vector2 mousePosition = RAYLIB_VECTOR2_TO_CLAY_VECTOR2(GetMousePosition());
+        Vector2 mouseWheelDelta = GetMouseWheelMoveV();
+        float mouseWheelX = mouseWheelDelta.x;
+        float mouseWheelY = mouseWheelDelta.y;
+
+	/*
+        if (reinitializeClay) {
+            Clay_SetMaxElementCount(8192);
+            totalMemorySize = Clay_MinMemorySize();
+            clayMemory = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, malloc(totalMemorySize));
+            Clay_Initialize(clayMemory, (Clay_Dimensions) { (float)GetScreenWidth(), (float)GetScreenHeight() }, (Clay_ErrorHandler) { HandleClayErrors });
+            reinitializeClay = false;
+        } */
+
+        UpdateDrawFrame((float)GetScreenWidth(), (float)GetScreenHeight(), mouseWheelX, mouseWheelY, mousePosition.x, mousePosition.y, false, IsMouseButtonDown(0), IsKeyPressed(KEY_DOWN), IsKeyPressed(KEY_UP), IsKeyPressed(KEY_D), GetFrameTime());
+    }
+
     return 0;
 }
+
+#else
+int main(void) { return 0; }
+#endif
