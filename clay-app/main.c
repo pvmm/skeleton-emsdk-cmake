@@ -161,8 +161,7 @@ void DeclarativeSyntaxPageMobile() {
     }
 }
 
-#ifdef PLATFORM_WEB
-Clay_Color ColorLerp(Clay_Color a, Clay_Color b, float amount) {
+Clay_Color ColorLerp2(Clay_Color a, Clay_Color b, float amount) {
     return (Clay_Color) {
         .r = a.r + (b.r - a.r) * amount,
         .g = a.g + (b.g - a.g) * amount,
@@ -170,7 +169,6 @@ Clay_Color ColorLerp(Clay_Color a, Clay_Color b, float amount) {
         .a = a.a + (b.a - a.a) * amount,
     };
 }
-#endif
 
 Clay_String LOREM_IPSUM_TEXT = CLAY_STRING("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
 
@@ -185,10 +183,10 @@ void HighPerformancePageDesktop(float lerpValue) {
         }
         CLAY(CLAY_ID("PerformanceRightImageOuter"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_PERCENT(0.50) }, .childAlignment = {CLAY_ALIGN_X_CENTER} })) {
             CLAY(CLAY_LAYOUT({ .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(400) } }), CLAY_BORDER_ALL({ .width = 2, .color = COLOR_LIGHT })) {
-                CLAY(CLAY_ID("AnimationDemoContainerLeft"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_PERCENT(0.3f + 0.4f * lerpValue), CLAY_SIZING_GROW(0) }, .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}, .padding = CLAY_PADDING_ALL(32) }), CLAY_RECTANGLE({ .color = ColorLerp(COLOR_RED, COLOR_ORANGE, lerpValue) })) {
+                CLAY(CLAY_ID("AnimationDemoContainerLeft"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_PERCENT(0.3f + 0.4f * lerpValue), CLAY_SIZING_GROW(0) }, .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}, .padding = CLAY_PADDING_ALL(32) }), CLAY_RECTANGLE({ .color = ColorLerp2(COLOR_RED, COLOR_ORANGE, lerpValue) })) {
                     CLAY_TEXT(LOREM_IPSUM_TEXT, CLAY_TEXT_CONFIG({ .fontSize = 24, .fontId = FONT_ID_TITLE_56, .textColor = COLOR_LIGHT }));
                 }
-                CLAY(CLAY_ID("AnimationDemoContainerRight"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0) }, .childAlignment = {.y = CLAY_ALIGN_Y_CENTER},  .padding = CLAY_PADDING_ALL(32) }), CLAY_RECTANGLE({ .color = ColorLerp(COLOR_ORANGE, COLOR_RED, lerpValue) })) {
+                CLAY(CLAY_ID("AnimationDemoContainerRight"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0) }, .childAlignment = {.y = CLAY_ALIGN_Y_CENTER},  .padding = CLAY_PADDING_ALL(32) }), CLAY_RECTANGLE({ .color = ColorLerp2(COLOR_ORANGE, COLOR_RED, lerpValue) })) {
                     CLAY_TEXT(LOREM_IPSUM_TEXT, CLAY_TEXT_CONFIG({ .fontSize = 24, .fontId = FONT_ID_TITLE_56, .textColor = COLOR_LIGHT }));
                 }
             }
@@ -207,10 +205,10 @@ void HighPerformancePageMobile(float lerpValue) {
         }
         CLAY(CLAY_ID("PerformanceRightImageOuter"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_GROW(0) }, .childAlignment = {CLAY_ALIGN_X_CENTER} })) {
             CLAY(CLAY_ID(""), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(400) } }), CLAY_BORDER_ALL({ .width = 2, .color = COLOR_LIGHT })) {
-                CLAY(CLAY_ID("AnimationDemoContainerLeft"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_PERCENT(0.35f + 0.3f * lerpValue), CLAY_SIZING_GROW(0) }, .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}, .padding = CLAY_PADDING_ALL(16) }), CLAY_RECTANGLE({ .color = ColorLerp(COLOR_RED, COLOR_ORANGE, lerpValue) })) {
+                CLAY(CLAY_ID("AnimationDemoContainerLeft"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_PERCENT(0.35f + 0.3f * lerpValue), CLAY_SIZING_GROW(0) }, .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}, .padding = CLAY_PADDING_ALL(16) }), CLAY_RECTANGLE({ .color = ColorLerp2(COLOR_RED, COLOR_ORANGE, lerpValue) })) {
                     CLAY_TEXT(LOREM_IPSUM_TEXT, CLAY_TEXT_CONFIG({ .fontSize = 24, .fontId = FONT_ID_TITLE_56, .textColor = COLOR_LIGHT }));
                 }
-                CLAY(CLAY_ID("AnimationDemoContainerRight"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0) }, .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}, .padding = CLAY_PADDING_ALL(16) }), CLAY_RECTANGLE({ .color = ColorLerp(COLOR_ORANGE, COLOR_RED, lerpValue) })) {
+                CLAY(CLAY_ID("AnimationDemoContainerRight"), CLAY_LAYOUT({ .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0) }, .childAlignment = {.y = CLAY_ALIGN_Y_CENTER}, .padding = CLAY_PADDING_ALL(16) }), CLAY_RECTANGLE({ .color = ColorLerp2(COLOR_ORANGE, COLOR_RED, lerpValue) })) {
                     CLAY_TEXT(LOREM_IPSUM_TEXT, CLAY_TEXT_CONFIG({ .fontSize = 24, .fontId = FONT_ID_TITLE_56, .textColor = COLOR_LIGHT }));
                 }
             }
@@ -483,30 +481,48 @@ int main(void) {
     uint64_t totalMemorySize = Clay_MinMemorySize();
     Clay_Arena clayMemory = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, malloc(totalMemorySize));
     Clay_SetMeasureTextFunction(Raylib_MeasureText);
-    Clay_Initialize(clayMemory, (Clay_Dimensions) { (float)GetScreenWidth(), (float)GetScreenHeight() }, (Clay_ErrorHandler) { HandleClayErrors });
+    Clay_Initialize(clayMemory,
+        (Clay_Dimensions) { (float)GetScreenWidth(), (float)GetScreenHeight() },
+		(Clay_ErrorHandler) { HandleClayErrors });
+
     Clay_Raylib_Initialize(1024, 768, "Official Clay Website", FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT);
 
-    double currentTime;
-    double oldTime;
+	// set font
+	Raylib_fonts[FONT_ID_BODY_16] = (Raylib_Font) {
+		.font = LoadFontEx("resources/Roboto-Regular.ttf", 48, 0, 400),
+		.fontId = FONT_ID_BODY_16
+	};
+	SetTextureFilter(Raylib_fonts[FONT_ID_BODY_16].font.texture, TEXTURE_FILTER_BILINEAR);
+	Raylib_fonts[FONT_ID_TITLE_56] = (Raylib_Font) {
+		.font = LoadFontEx("resources/Roboto-Regular.ttf", 48, 0, 400),
+		.fontId = FONT_ID_TITLE_56
+	};
+	SetTextureFilter(Raylib_fonts[FONT_ID_TITLE_56].font.texture, TEXTURE_FILTER_BILINEAR);
+	Raylib_fonts[FONT_ID_BODY_24] = (Raylib_Font) {
+		.font = LoadFontEx("resources/Roboto-Regular.ttf", 48, 0, 400),
+		.fontId = FONT_ID_BODY_24
+	};
+	SetTextureFilter(Raylib_fonts[FONT_ID_BODY_24].font.texture, TEXTURE_FILTER_BILINEAR);
+	SetTextureFilter(Raylib_fonts[FONT_ID_BODY_36].font.texture, TEXTURE_FILTER_BILINEAR);
+	Raylib_fonts[FONT_ID_BODY_36] = (Raylib_Font) {
+		.font = LoadFontEx("resources/Roboto-Regular.ttf", 48, 0, 400),
+		.fontId = FONT_ID_BODY_36
+	};
+	SetTextureFilter(Raylib_fonts[FONT_ID_BODY_36].font.texture, TEXTURE_FILTER_BILINEAR);
+	SetTextureFilter(Raylib_fonts[FONT_ID_TITLE_36].font.texture, TEXTURE_FILTER_BILINEAR);
+	Raylib_fonts[FONT_ID_TITLE_36] = (Raylib_Font) {
+		.font = LoadFontEx("resources/Roboto-Regular.ttf", 48, 0, 400),
+		.fontId = FONT_ID_TITLE_36
+	};
+	SetTextureFilter(Raylib_fonts[FONT_ID_TITLE_36].font.texture, TEXTURE_FILTER_BILINEAR);
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         Clay_Vector2 mousePosition = RAYLIB_VECTOR2_TO_CLAY_VECTOR2(GetMousePosition());
-        Vector2 mouseWheelDelta = GetMouseWheelMoveV();
-        float mouseWheelX = mouseWheelDelta.x;
-        float mouseWheelY = mouseWheelDelta.y;
+        Clay_Vector2 mouseWheel = RAYLIB_VECTOR2_TO_CLAY_VECTOR2(GetMouseWheelMoveV());
 
-	/*
-        if (reinitializeClay) {
-            Clay_SetMaxElementCount(8192);
-            totalMemorySize = Clay_MinMemorySize();
-            clayMemory = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, malloc(totalMemorySize));
-            Clay_Initialize(clayMemory, (Clay_Dimensions) { (float)GetScreenWidth(), (float)GetScreenHeight() }, (Clay_ErrorHandler) { HandleClayErrors });
-            reinitializeClay = false;
-        } */
-
-        UpdateDrawFrame((float)GetScreenWidth(), (float)GetScreenHeight(), mouseWheelX, mouseWheelY, mousePosition.x, mousePosition.y, false, IsMouseButtonDown(0), IsKeyPressed(KEY_DOWN), IsKeyPressed(KEY_UP), IsKeyPressed(KEY_D), GetFrameTime());
+        UpdateDrawFrame((float)GetScreenWidth(), (float)GetScreenHeight(), mouseWheel.x, mouseWheel.y, mousePosition.x, mousePosition.y, false, IsMouseButtonDown(0), IsKeyPressed(KEY_DOWN), IsKeyPressed(KEY_UP), IsKeyPressed(KEY_D), GetFrameTime());
     }
 
     return 0;
