@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(raylib_ C)
+project(build_raylib C)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 include(FetchContent)
 include(ExternalProject)
@@ -42,12 +42,11 @@ elseif(PLATFORM STREQUAL "Desktop")
     set_target_properties(raylib PROPERTIES CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-# A fake target forces raylib to compile
-add_executable(raylib_ tmp.c)
-target_link_libraries(raylib_ PUBLIC raylib)
+# Custom target forces raylib to compile
+add_custom_target(build_raylib ALL DEPENDS raylib)
 
 # Send raylib variables upstream to the root project
 add_custom_command(
-    TARGET raylib_ POST_BUILD
+    TARGET build_raylib POST_BUILD
     COMMAND ${CMAKE_COMMAND}
     ARGS -D raylib_SOURCE_DIR=${raylib_SOURCE_DIR} -D raylib_BINARY_DIR=${raylib_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/vars.cmake)

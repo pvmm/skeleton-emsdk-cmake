@@ -128,12 +128,18 @@ if(DEFINED USE_CLANG)
 	else()
 		message("-- Compiler set to ${CLANG_EXE}")
 	endif()
-	message("-- Checking if clang works... ${CLANG_EXE}")
-	execute_process(COMMAND ${CLANG_EXE} --version OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
-	message("-- Found clang executable at ${CLANG_EXE}")
+	# Build raylib with clang
+	if(PLATFORM STREQUAL Desktop)
+		# Configure and build raylib
+		build_clang_target(raylib -DPLATFORM=Desktop -DCMAKE_BUILD_TYPE=DEBUG)
+	endif()
 endif()
 
 # Get raylib options back
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/RAYLIB_SRC.txt")
+	message(FATAL_ERROR "raylib building not finished")
+endif()
+
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/RAYLIB_SRC.txt" RAYLIB_SRC)
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/raylib/${BIN_DIR}/RAYLIB_BIN.txt" RAYLIB_BIN)
 

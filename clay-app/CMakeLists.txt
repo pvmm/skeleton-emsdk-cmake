@@ -52,7 +52,6 @@ if(PLATFORM STREQUAL Web)
     target_compile_options(${PROJECT}
         PUBLIC
         --target=wasm32
-        -fuse-ld=${LINKER}
         -Wall
         -emit-llvm
         -Os
