@@ -17,7 +17,7 @@ const uint32_t FONT_ID_TITLE_56 = 1;
 const uint32_t FONT_ID_BODY_24 = 2;
 const uint32_t FONT_ID_BODY_36 = 3;
 const uint32_t FONT_ID_TITLE_36 = 4;
-const uint32_t FONT_ID_MONOSPACE_24 = 5;
+//const uint32_t FONT_ID_MONOSPACE_24 = 5;
 
 const Clay_Color COLOR_LIGHT = (Clay_Color) {244, 235, 230, 255};
 const Clay_Color COLOR_LIGHT_HOVER = (Clay_Color) {224, 215, 210, 255};
@@ -401,7 +401,7 @@ CLAY_WASM_EXPORT("UpdateDrawFrame") Clay_RenderCommandArray UpdateDrawFrame(floa
     Clay_ScrollContainerData scrollContainerData = Clay_GetScrollContainerData(Clay_GetElementId(CLAY_STRING("OuterScrollContainer")));
     Clay_LayoutElementHashMapItem *perfPage = Clay__GetHashMapItem(Clay_GetElementId(CLAY_STRING("PerformanceOuter")).id);
     // NaN propagation can cause pain here
-    float perfPageYOffset = perfPage->boundingBox.y + scrollContainerData.scrollPosition->y;
+    float perfPageYOffset = perfPage->boundingBox.y; // + scrollContainerData.scrollPosition->y;
     if (deltaTime == deltaTime && (ACTIVE_RENDERER_INDEX == 1 || (perfPageYOffset < height && perfPageYOffset + perfPage->boundingBox.height > 0))) {
         animationLerpValue += deltaTime;
         if (animationLerpValue > 1) {
@@ -476,11 +476,17 @@ void HandleClayErrors(Clay_ErrorData errorData) {
     }
 }
 
+Clay_Vector2 queryScrollOffsetFunction(uint32_t elementId)
+{
+    return (Clay_Vector2){-1, -1};
+}
+
 // Dummy main() to please cmake - TODO get wasm working with cmake on this example
 int main(void) {
     uint64_t totalMemorySize = Clay_MinMemorySize();
     Clay_Arena clayMemory = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, malloc(totalMemorySize));
     Clay_SetMeasureTextFunction(Raylib_MeasureText);
+    Clay_SetQueryScrollOffsetFunction(queryScrollOffsetFunction);
     Clay_Initialize(clayMemory,
         (Clay_Dimensions) { (float)GetScreenWidth(), (float)GetScreenHeight() },
 		(Clay_ErrorHandler) { HandleClayErrors });
